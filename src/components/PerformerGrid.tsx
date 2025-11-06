@@ -117,17 +117,19 @@ export default function PerformerGrid({ performers }: PerformerGridProps) {
             }}
           >
             {/* Photo */}
-            <div style={{
-              width: '100%',
-              aspectRatio: '3 / 4',
-              borderRadius: 'clamp(6px, 1vw, 8px)',
-              overflow: 'hidden',
-              backgroundColor: 'rgba(255, 215, 0, 0.1)',
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
+            <div 
+              className="performer-photo-container"
+              style={{
+                width: '100%',
+                borderRadius: 'clamp(6px, 1vw, 8px)',
+                overflow: 'hidden',
+                backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
               {photoPath ? (
                 <img 
                   src={photoPath}
@@ -175,21 +177,10 @@ export default function PerformerGrid({ performers }: PerformerGridProps) {
               {performer.name}
             </div>
 
-            {/* Role */}
-            <div style={{
-              color: 'rgba(255, 255, 255, 0.9)',
-              fontFamily: "Oswald, sans-serif",
-              fontSize: 'clamp(0.8rem, 1.8vw, 0.95rem)',
-              textAlign: 'center',
-              opacity: 0.8
-            }}>
-              Performer
-            </div>
-
-            {/* Award */}
+            {/* Award/Commitment */}
             {shouldShowAward && (
               <div style={{
-                color: '#ffd700',
+                color: 'rgba(255, 255, 255, 0.9)',
                 fontFamily: "Oswald, sans-serif",
                 fontSize: 'clamp(0.75rem, 1.6vw, 0.85rem)',
                 textAlign: 'center',

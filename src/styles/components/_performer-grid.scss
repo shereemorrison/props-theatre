@@ -24,5 +24,18 @@
     grid-template-columns: repeat(6, 1fr);
     max-width: none; // Remove max-width to fill available space
   }
+  
+  // Photo container - responsive aspect ratio
+  .performer-photo-container {
+    aspect-ratio: 3 / 4; // Default aspect ratio (portrait)
+    
+    // Mobile: reduce photo height to 2/3rds of original
+    // Original: 3/4 means width=3, height=4
+    // 2/3rds height: new height = 4 * 2/3 = 8/3 ≈ 2.67
+    // New aspect ratio: 3 / (8/3) = 9/8 (wider, shorter height)
+    @media (max-width: 767px) {
+      aspect-ratio: 9 / 8; // Shorter height on mobile (2/3rds of original height)
+    }
+  }
 }
 
