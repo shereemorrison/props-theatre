@@ -10,8 +10,8 @@
   
   // Extra padding on mobile for scrolling
   @media (max-width: 1023px) {
-    padding-top: clamp(0.0rem, 0.5vh, 0.5rem) !important; // Even more reduced top padding to move menu up
-    padding-bottom: clamp(6rem, 12vh, 8rem) !important; // Extra padding at bottom for mobile scrolling
+    padding-top: clamp(0.0rem, 0.5vh, 0.5rem) !important; 
+    padding-bottom: clamp(6rem, 12vh, 8rem) !important; 
     // Ensure content can scroll - allow it to grow beyond viewport
     min-height: calc(100vh + 1px) !important; // Slightly more than viewport to ensure scrollability
   }
@@ -67,9 +67,9 @@
 
   // On mobile, make items wider but slightly shorter - still compact to fit grid on one screen
   @media (max-width: 767px) {
-    max-width: clamp(150px, 35vw, 190px) !important; // Even wider still
-    min-width: clamp(140px, 30vw, 170px) !important; // Even wider still
-    aspect-ratio: 5 / 6 !important; // Even shorter
+    max-width: clamp(150px, 35vw, 190px) !important;
+    min-width: clamp(140px, 30vw, 170px) !important;
+    aspect-ratio: 5 / 6 !important; 
   }
 }
 
