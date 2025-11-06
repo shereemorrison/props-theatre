@@ -14,7 +14,7 @@ export interface Day {
   day: string; // "Monday 24th", "Tuesday 25th", etc.
   year: number; // 2025
   stages: Stage[];
-  hasThankYou?: boolean; // For Thursday which has Thank You section
+  hasThankYou?: boolean; // For Friday which has Thank You section
 }
 
 export const days: Day[] = [
