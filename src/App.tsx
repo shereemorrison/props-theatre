@@ -17,6 +17,7 @@ function App() {
   const [showMainPage, setShowMainPage] = useState(true);
   const [loadingHidden, setLoadingHidden] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [curtainImageReady, setCurtainImageReady] = useState(false);
   const loading = useRef<HTMLDivElement>(null);
   const landingPageRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -29,8 +30,25 @@ function App() {
     }
   }, []); // Only run on mount (refresh)
 
+  // Preload curtain image first, before anything else
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      // Image is loaded and ready
+      setCurtainImageReady(true);
+    };
+    img.onerror = () => {
+      // Even if image fails to load, proceed (fallback)
+      setCurtainImageReady(true);
+    };
+    img.src = curtainImage;
+  }, []);
+
   useGSAP(
     () => {
+      // Wait for curtain image to be ready before starting animation
+      if (!curtainImageReady) return;
+
       // Initialize curtain elements
       const leftCurtain = document.querySelector(".loadings-left");
       const rightCurtain = document.querySelector(".loadings-right");
@@ -45,7 +63,11 @@ function App() {
 
       // Simplified timeline: curtains open onto the menu
       const curtainDuration = 2.5;
-      const tl = gsap.timeline({ defaults: { ease: "power2.inOut" } });
+      const imageReadyDelay = 0.2; // 0.2s delay after image is ready before splitting
+      const tl = gsap.timeline({ 
+        defaults: { ease: "power2.inOut" },
+        delay: imageReadyDelay // Delay after image is ready
+      });
       
       // Keep menu behind curtains initially, then bring it forward after curtains finish
       // The menu will have lower z-index initially via CSS, then we'll raise it
@@ -82,7 +104,7 @@ function App() {
         }
       }, curtainDuration);
     },
-    { scope: loading }
+    { scope: loading, dependencies: [curtainImageReady] }
   );
 
   return (

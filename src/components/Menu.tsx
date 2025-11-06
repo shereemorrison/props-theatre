@@ -98,8 +98,10 @@ export default function Menu({ onPageClick, isVisible, skipAnimation = false }: 
       rotation: -5
     });
 
-    // Start animation immediately - images will load in background
-    const tl = gsap.timeline({ delay: 0 });
+    // Start animation with delay so it starts after curtains have already begun splitting
+    // Curtains take 2.5s to split, so delay menu animation until curtains are partially open
+    const menuAnimationDelay = 0.5; // Start menu animation 0.5s after curtains start splitting
+    const tl = gsap.timeline({ delay: menuAnimationDelay });
 
     // Menu items - staggered entrance with page-like effect
     tl.to(itemsRef.current, {
