@@ -6,17 +6,17 @@ import Header from './Header';
 
 // Import images from assets for menu backgrounds
 // @ts-ignore - Image imports handled by Vite
-import mondayBg from '../assets/images/stageone/stageone1.webp';
+import mondayBg from '../assets/images/performers/ellenfrigerio.webp';
 // @ts-ignore
-import tuesdayBg from '../assets/images/stagetwo/stagetwo10.webp';
+import tuesdayBg from '../assets/images/performers/dantejameson.webp';
 // @ts-ignore
-import wednesdayBg from '../assets/images/stagethree/stagethree10.webp';
+import wednesdayBg from '../assets/images/performers/alicestockx.webp';
 // @ts-ignore
-import thursdayBg from '../assets/images/stageone/stageone10.webp';
+import thursdayBg from '../assets/images/performers/sophiepedrotti.webp';
 // @ts-ignore
-import creditsBg from '../assets/images/stagetwo/stagetwo5.webp';
-// @ts-ignore
-import contactBg from '../assets/images/stagethree/stagethree5.webp';
+import fridayBg from '../assets/images/performers/charlottebysouth.webp';
+// @ts-ignore - Use a performer photo for Onwards/credits
+import onwardsBg from '../assets/images/performers/minniepetterlin.webp';
 
 interface MenuProps {
   onPageClick?: (pageIndex: number) => void;
@@ -29,49 +29,15 @@ const menuItems = [
   { id: 'tuesday-25th', title: 'Tues', subtitle: '25th', route: '/day/tuesday-25th', year: 2025, background: tuesdayBg },
   { id: 'wednesday-26th', title: 'Wed', subtitle: '26th', route: '/day/wednesday-26th', year: 2025, background: wednesdayBg },
   { id: 'thursday-27th', title: 'Thurs', subtitle: '27th', route: '/day/thursday-27th', year: 2025, background: thursdayBg },
-  { id: 'credits', title: 'Onwards', subtitle: '2026', route: '/acknowledgements', background: creditsBg },
-  { id: 'contact', title: 'Contact', subtitle: '', route: '/contact', year: null, background: contactBg },
+  { id: 'friday-28th', title: 'Fri', subtitle: '28th', route: '/day/friday-28th', year: 2025, background: fridayBg },
+  { id: 'credits', title: 'Onwards', subtitle: '2026', route: '/acknowledgements', background: onwardsBg },
 ];
 
 export default function Menu({ onPageClick, isVisible, skipAnimation = false }: MenuProps) {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-
-  // Preload images in background (non-blocking)
-  useEffect(() => {
-    if (!isVisible) {
-      setImagesLoaded(false); // Reset when hidden
-      return;
-    }
-
-    const imageUrls = menuItems.map(item => item.background).filter(Boolean) as string[];
-    
-    // Start preloading images but don't block the animation
-    const preloadImages = async () => {
-      try {
-        await Promise.all(
-          imageUrls.map(
-            (src) =>
-              new Promise<void>((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                  img.decode().then(() => resolve()).catch(() => resolve());
-                };
-                img.onerror = () => resolve(); // Resolve even on error to not block
-                img.src = src;
-              })
-          )
-        );
-        setImagesLoaded(true);
-      } catch (error) {
-        setImagesLoaded(true); // Proceed even if preload fails
-      }
-    };
-
-    preloadImages();
-  }, [isVisible]);
+  // No need to preload images since menu items don't have backgrounds anymore
 
   useEffect(() => {
     // Only start animation when menu is visible

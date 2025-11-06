@@ -69,6 +69,16 @@
     box-sizing: border-box;
     width: 100%;
     
+    // Wider layout for desktop screens
+    @media (min-width: 1200px) {
+      max-width: min(1200px, 95vw);
+    }
+    
+    // Even wider for large desktop screens
+    @media (min-width: 1600px) {
+      max-width: min(1400px, 95vw);
+    }
+    
     h1 {
       color: #ffd700;
       font-size: clamp(2rem, 6vw, 3rem);
@@ -96,6 +106,14 @@
       line-height: 1.6;
       margin-bottom: clamp(2rem, 5vh, 3rem);
       opacity: 0.8;
+    }
+    
+    .story-blurb {
+      text-align: left;
+      
+      @media (min-width: 1200px) {
+        text-align: left;
+      }
     }
     
     h2 {

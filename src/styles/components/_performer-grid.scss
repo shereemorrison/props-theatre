@@ -1,0 +1,28 @@
+// Performer Grid Styles
+.performer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); // Mobile: 2 columns
+  gap: clamp(1rem, 2vw, 1.5rem);
+  
+  // Tablet and up: 3 columns
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  // Desktop: 4 columns
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  // Large desktop: 5 columns when content is wider
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  // Extra large desktop: 6 columns when blurb fills more space
+  @media (min-width: 1600px) {
+    grid-template-columns: repeat(6, 1fr);
+    max-width: none; // Remove max-width to fill available space
+  }
+}
+

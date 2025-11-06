@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { days } from '../data/performances';
-import { getGalleryImages } from '../data/gallery';
-import { getPerformersByStageAndDay, performers } from '../data/performers';
+import { getPerformersByStageAndDay } from '../data/performers';
+import PerformerGrid from '../components/PerformerGrid';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
@@ -19,10 +19,6 @@ export default function StagePage() {
   const subtitleRef = useRef<HTMLDivElement>(null);
   const storyContainerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const imagesRef = useRef<(HTMLDivElement | null)[]>([]);
-  const [imagePaths, setImagePaths] = useState<string[]>([]);
-  const [imagesLoading, setImagesLoading] = useState(true);
-  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Find the stage data from all days and also find which day it belongs to
   let stageData = null;
@@ -48,24 +44,7 @@ export default function StagePage() {
   }
 
   // Get performers for this stage and day
-  const performers = parentDayId ? getPerformersByStageAndDay(stageId, parentDayId) : [];
-  
-  // Create cast array from performers with awards
-  const castMembers = performers.length > 0 
-    ? performers.map(p => ({ name: p.name, awards: p.awards || [] }))
-    : stageData.cast.map(c => ({ name: c.name, awards: [] }));
-
-  // Get gallery images from data file
-  useEffect(() => {
-    setImagesLoading(true);
-    
-    // Get images for this stage from the gallery data file
-    const images = getGalleryImages(stageId || '');
-    console.log(`Found ${images.length} gallery images for stage: ${stageId}`);
-    
-    setImagePaths(images);
-      setImagesLoading(false);
-  }, [stageId]);
+  const stagePerformers = parentDayId ? getPerformersByStageAndDay(stageId || '', parentDayId) : [];
 
   // Split the summary into words
   const words = stageData.summary.split(' ');
@@ -78,6 +57,20 @@ export default function StagePage() {
 
     const wordElements = blurbRef.current.querySelectorAll('.word');
     if (wordElements.length === 0) return;
+
+    // Set initial state for performer cards IMMEDIATELY (before any animations)
+    const performersSection = sectionRefs.current[1]; // Performers section
+    if (performersSection) {
+      const performerCards = performersSection.querySelectorAll('.performer-card');
+      if (performerCards.length > 0) {
+        // Set initial hidden state immediately - no flash
+        gsap.set(performerCards, {
+          opacity: 0,
+          y: 30,
+          scale: 0.9
+        });
+      }
+    }
 
     // Refresh ScrollTrigger to recalculate
     ScrollTrigger.refresh();
@@ -103,19 +96,39 @@ export default function StagePage() {
       y: 20
     });
 
-    // Words - animate on scroll
+    // Words - animate on scroll with fast stagger so all animate together
     ScrollTrigger.create({
       trigger: blurbRef.current,
       start: 'top 80%',
       toggleActions: 'play none none none',
       onEnter: () => {
-        gsap.to(wordElements, {
+        // Create timeline for blurb and performer cards
+        const blurbTimeline = gsap.timeline();
+        
+        // Animate blurb text first
+        blurbTimeline.to(wordElements, {
           opacity: 1,
           y: 0,
           duration: 0.5,
-          stagger: 0.03,
+          stagger: 0.01, // Much faster stagger so all words animate together
           ease: 'power2.out'
         });
+        
+        // Animate performer cards at the same time as blurb starts
+        if (performersSection) {
+          const performerCards = performersSection.querySelectorAll('.performer-card');
+          
+          if (performerCards.length > 0) {
+            blurbTimeline.to(performerCards, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.6,
+              stagger: 0.05,
+              ease: 'power2.out'
+            }, 0); // Start at the same time as blurb (position 0 in timeline)
+          }
+        }
       }
     });
 
@@ -164,9 +177,13 @@ export default function StagePage() {
     
     // Ensure Cast & Crew section is always visible - fallback if ScrollTrigger doesn't fire
     // Check all sections and make sure they're visible if they're in viewport
+    // BUT skip performer section (index 1) - it should only animate after blurb
     const ensureSectionsVisible = () => {
-      sectionRefs.current.forEach((section) => {
+      sectionRefs.current.forEach((section, index) => {
         if (!section) return;
+        // Skip performer section (index 1) - it animates with blurb timeline
+        if (index === 1) return;
+        
         const rect = section.getBoundingClientRect();
         const isInView = rect.top < window.innerHeight * 1.5 && rect.bottom > -window.innerHeight * 0.5;
         if (isInView) {
@@ -189,65 +206,22 @@ export default function StagePage() {
       ensureSectionsVisible();
     });
     
-    if (!imagesLoading) {
-      refreshTimerRef.current = setTimeout(() => {
-        ScrollTrigger.refresh();
-        ensureSectionsVisible();
-      }, 500);
-    }
-
-    // Animate images as they come into view
-    imagesRef.current.forEach((imgContainer, index) => {
-      if (!imgContainer) return;
-
-      // Set initial state - visible by default
-      gsap.set(imgContainer, {
-        opacity: 1,
-        y: 0,
-        scale: 1
-      });
-
-      // Only animate if there are multiple images and we want scroll animation
-      if (imagesRef.current.length > 1) {
-        ScrollTrigger.create({
-          trigger: imgContainer,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-          onEnter: () => {
-            gsap.fromTo(imgContainer, 
-              {
-                opacity: 0,
-                y: 30,
-                scale: 0.95
-              },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.8,
-                ease: 'power2.out'
-              }
-            );
-          }
-        });
-      }
-    });
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+      ensureSectionsVisible();
+    }, 500);
 
     // Cleanup
     return () => {
-      if (refreshTimerRef.current) {
-        clearTimeout(refreshTimerRef.current);
-      }
       ScrollTrigger.getAll().forEach(trigger => {
         if (trigger.vars.trigger === storyContainerRef.current || 
             trigger.vars.trigger === blurbRef.current ||
-            sectionRefs.current.includes(trigger.vars.trigger as HTMLDivElement) ||
-            imagesRef.current.includes(trigger.vars.trigger as HTMLDivElement)) {
+            sectionRefs.current.includes(trigger.vars.trigger as HTMLDivElement)) {
           trigger.kill();
         }
       });
     };
-  }, { dependencies: [stageData, imagePaths, imagesLoading] });
+  }, { dependencies: [stageData, stagePerformers] });
 
   return (
     <div className="detail-page">
@@ -280,99 +254,14 @@ export default function StagePage() {
           </p>
         </section>
 
-        {/* Cast Section - moved above Gallery */}
-        <section className="story-section cast-section" ref={el => { sectionRefs.current[1] = el as HTMLDivElement }}>
-          <h2>Cast</h2>
-          {castMembers.length > 0 ? (
-            <div className="cast-grid">
-              {castMembers.map((member, i) => {
-                // Find the performer to get their commitment (which is the award)
-                const performer = performers.find(p => p.name === member.name);
-                const commitment = performer?.commitment;
-                
-                // Don't show award if it's Beginner, Intermediate, or (None)
-                const shouldShowAward = commitment && 
-                  commitment !== '(None)' && 
-                  commitment !== 'Beginner' && 
-                  commitment !== 'Intermediate';
-                
-                return (
-                  <div key={i} className="cast-member-card">
-                    <div style={{ fontWeight: 'bold', color: '#ffd700', fontFamily: "Oswald, sans-serif" }}>{member.name}</div>
-                    {shouldShowAward && (
-                      <div style={{ color: '#ffffff', opacity: 0.8, fontFamily: "Oswald, sans-serif", fontSize: 'clamp(0.85rem, 2vw, 1rem)', marginTop: '0.25rem' }}>
-                        {commitment}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p style={{ 
-              color: 'rgba(255, 255, 255, 0.7)', 
-              fontFamily: "Oswald, sans-serif",
-              fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-              marginTop: 'clamp(1rem, 2vh, 1.5rem)',
-              marginBottom: 'clamp(1rem, 2vh, 1.5rem)'
-            }}>
-              Performer information coming soon
-            </p>
-          )}
-        </section>
-
-        {/* Stage Images Gallery */}
-        <section className="story-section stage-images-section" ref={el => { sectionRefs.current[2] = el as HTMLDivElement }}>
-          <h2>Gallery</h2>
-          {imagesLoading ? (
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '2rem',
-              color: 'rgba(255, 255, 255, 0.7)',
-              fontFamily: "Oswald, sans-serif"
-            }}>
-              Loading images...
-            </div>
-          ) : imagePaths.length > 0 ? (
-            <div className="stage-images-grid">
-              {imagePaths.map((imagePath, index) => (
-                <div 
-                  key={`${imagePath}-${index}`}
-                  className="stage-image-container"
-                  ref={el => { 
-                    if (el) imagesRef.current[index] = el;
-                  }}
-                >
-                  <img 
-                    src={imagePath}
-                    alt={`${stageData.title} - Image ${index + 1}`}
-                    loading="eager"
-                    onError={(e) => {
-                      console.error(`Failed to load image ${index + 1}: ${imagePath}`);
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                    }}
-                    onLoad={() => {
-                      console.log(`Successfully loaded image ${index + 1}: ${imagePath}`);
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '2rem',
-              color: 'rgba(255, 255, 255, 0.7)',
-              fontFamily: "Oswald, sans-serif"
-            }}>
-              No images found
-            </div>
-          )}
+        {/* Performers Grid - replaces Cast and Gallery */}
+        <section className="story-section performers-section" ref={el => { sectionRefs.current[1] = el as HTMLDivElement }}>
+          <h2>Performers</h2>
+          <PerformerGrid performers={stagePerformers} />
         </section>
 
         {stageData.awards.length > 0 && (
-          <section className="story-section" ref={el => { sectionRefs.current[3] = el as HTMLDivElement }}>
+          <section className="story-section" ref={el => { sectionRefs.current[2] = el as HTMLDivElement }}>
             <h2>Awards & Recognition</h2>
             <div className="awards-grid">
               {stageData.awards.map((award, i) => (

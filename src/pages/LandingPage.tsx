@@ -15,8 +15,8 @@ function LandingPage({ showMenu = true }: LandingPageProps) {
       '/day/tuesday-25th', 
       '/day/wednesday-26th', 
       '/day/thursday-27th', 
-      '/acknowledgements', 
-      '/contact'
+      '/day/friday-28th', 
+      '/acknowledgements'
     ];
     if (pageIndex >= 0 && pageIndex < routes.length) {
       navigate(routes[pageIndex]);

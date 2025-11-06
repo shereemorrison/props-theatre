@@ -28,7 +28,7 @@ function mapDateToDayId(date: string): string {
     'Tuesday, 4 November 2025': 'tuesday-25th',
     'Wednesday, 5 November 2025': 'wednesday-26th',
     'Thursday, 6 November 2025': 'thursday-27th',
-    'Friday, 7 November 2025': 'friday-7th',
+    'Friday, 28 November 2025': 'friday-28th',
   };
   return dateMap[date] || date.toLowerCase().replace(/[^a-z0-9]/g, '-');
 }
@@ -41,11 +41,16 @@ function generateStageId(dayId: string, stage: string, date: string, time: strin
   // Special handling for Thursday Stage Two (multiple performances)
   if (dayId === 'thursday-27th' && stage === 'Stage Two') {
     if (time === '5:00 PM to 6:00 PM') {
-      return 'stage-two-thursday-our-space';
-    } else if (time === '5:30 PM to 6:30 PM') {
-      return 'stage-two-thursday-bad-side';
-    } else if (time === '6:00 PM to 7:00 PM') {
       return 'stage-two-thursday-pirated';
+    }
+  }
+  
+  // Special handling for Friday Stage Two (multiple performances)
+  if (dayId === 'friday-28th' && stage === 'Stage Two') {
+    if (time === '4:00 PM to 5:00 PM') {
+      return 'stage-two-friday-our-space';
+    } else if (time === '5:30 PM to 6:30 PM') {
+      return 'stage-two-friday-bad-side';
     }
   }
   
@@ -81,21 +86,23 @@ function createPerformer(
 
 // Performer data extracted from spreadsheet
 export const performers: Performer[] = [
-  // MONDAY - Stage One (4:00 PM to 5:00 PM)
+  // MONDAY - Stage One (4:00 PM to 5:00 PM) - Five Minutes Play
+  createPerformer('Amelia Beukes', 'First Year Pin June', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Arie Pope', 'First Year Pin Nov', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Ava Hawkey', '1 year of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Chaise Pellas', 'Beginner', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+  // createPerformer('Ava Hawkey', '1 year of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+  // createPerformer('Chaise Pellas', 'Beginner', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Dakota East', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Eadie Glatz', '3 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'), //3 years of drama
   createPerformer('Ella Henshall', '5 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Gabrielle Hall', '(None)', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Leo Epps', '3 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Lydia Deepan', '4 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+  // createPerformer('Leo Epps', '3 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+  // createPerformer('Lydia Deepan', '4 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Penelope Hall', 'First Year Pin June', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Sara Bates', 'Intermediate', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Willow Fuamatu', 'Beginner', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
 
-  // MONDAY - Stage Two (5:00 PM to 6:00 PM)
+  // MONDAY - Stage Two (5:00 PM to 6:00 PM) - The Bad Side Play
+  createPerformer('Charlie Wills', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Cora Critch', 'Beginner', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Dante Jameson', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Darby Scott-Anderson', '3 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
@@ -111,9 +118,10 @@ export const performers: Performer[] = [
   createPerformer('Maggie Amarant', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Nellie Ratcliffe', '(None)', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Olivia Osborne', '3 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Sofia Masullo', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+  // createPerformer('Sofia Masullo', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
 
-  // MONDAY - Stage Three (6:00 PM to 7:00 PM)
+  // MONDAY - Stage Three (6:00 PM to 7:00 PM) - The Ferrier's Shoes Play
+  createPerformer('Aida Burns', 'First Year Pin November', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Amelia Watkins', 'Beginner', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Ella Bailey', '2 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Ewan Dellar', '3 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
@@ -123,11 +131,13 @@ export const performers: Performer[] = [
   createPerformer('Lucy Cummings', '4 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Maggie Deacon', 'First Year Pin June', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Milla Gregg', 'Intermediate', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  createPerformer('Milla Web', '(None)', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Peyton Bish', 'Beginner', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Tahlia Giffard', '2 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Zarah Mealmaker', '3 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
 
-  // TUESDAY - Stage One (4:00 PM to 5:00 PM)
+  // TUESDAY - Stage Two (4:00 PM to 5:00 PM) - The Bad Side Play
+  createPerformer('Amy Clarkson', '3 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
   createPerformer('Billie Lothian', 'Beginner', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Charlee Russell', '2 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Emily Ede', '3 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
@@ -136,12 +146,13 @@ export const performers: Performer[] = [
   createPerformer('Isla Rorke', '3 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Matilda Engi', '4 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Mila McMillan', 'First Year Pin June', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Poppy Stanaway', 'Intermediate', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+  // createPerformer('Poppy Stanaway', 'Intermediate', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Ruby Sait', 'Beginner', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Sophie Breewel', '2 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Teddy Thomson', '3 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
 
-  // TUESDAY - Stage Two (5:00 PM to 6:00 PM)
+  // TUESDAY - Stage Two (5:00 PM to 6:00 PM) - Pirated Play
+  createPerformer('Anna Francis', 'First Year Pin Nov', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Arlie Allen', '5 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Eliza Hepburn', '(None)', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Elsie Rice', '3 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
@@ -156,7 +167,8 @@ export const performers: Performer[] = [
   createPerformer('Otto Luedecke', '3 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Sam Miller', '4 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
 
-  // TUESDAY - Stage Three (6:00 PM to 7:00 PM)
+  // TUESDAY - Stage Three (6:00 PM to 7:00 PM) - Ferrier's Shoes Play
+  createPerformer('Abigail Kay', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Amelia O\'Rielly', 'First Year Pin June', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Athena Jones', 'Intermediate', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Bailey Norton', 'Beginner', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
@@ -173,7 +185,8 @@ export const performers: Performer[] = [
   createPerformer('Taleitha Perrow', '3 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),  // was 3 years of drama - check this means 3 years
   createPerformer('Victoria Tomkins', '5 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'), // was 5 years of drama - check this means 5 years
 
-  // WEDNESDAY - Stage One (4:00 PM to 5:00 PM)
+  // WEDNESDAY - Stage One (4:00 PM to 5:00 PM) - Five Minutes Play
+  createPerformer('Alyssa Delmenico', '1 year of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Amelia Greening', '(None)', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Harper Ridgeway', '3 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Henry Beal', '4 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
@@ -187,7 +200,8 @@ export const performers: Performer[] = [
   createPerformer('Talia Roe', '3 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Ziggy Naidoo', '4 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
 
-  // WEDNESDAY - Stage Two (5:00 PM to 6:00 PM)
+  // WEDNESDAY - Stage Two (5:00 PM to 6:00 PM) The Bad Side Play
+  createPerformer('Aaliyah O\'Meara', 'First Year Pin Nov', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Alex Hicks', 'First Year Pin June', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Alice Stockx', 'Intermediate', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Ava Giffard', 'Beginner', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
@@ -202,10 +216,11 @@ export const performers: Performer[] = [
   createPerformer('Matilda Stubbins', 'Beginner', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Olive Gladstone', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Oliver Grange', '3 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Paige Delong', '5 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+  createPerformer('Paige DeJong', '5 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Rebekah Mclean', '(None)', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
 
-  // WEDNESDAY - Stage Three (6:00 PM to 7:00 PM)
+  // WEDNESDAY - Stage Three (6:00 PM to 7:00 PM) Ferrier's Shoes Play
+  createPerformer('Alira Hill', '5 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Arlo Sergi', '3 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Eva Lees', '4 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Hannah Torney', 'First Year Pin June', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
@@ -215,9 +230,10 @@ export const performers: Performer[] = [
   createPerformer('Neve Duthie', '3 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Sara Douglas', '5 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Tamati McLarty', '(None)', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Trinity Parker', '3 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  // createPerformer('Trinity Parker', '3 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
 
-  // THURSDAY - Stage One (4:00 PM to 5:00 PM)
+  // THURSDAY - Stage One (4:00 PM to 5:00 PM) Five Minutes Play
+  createPerformer('Charlotte Vandervalk', '1 year of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Dominic Petterlin', '4 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Dominica Mangantulao', 'First Year Pin June', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Elsie Sharp', 'Intermediate', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
@@ -227,7 +243,8 @@ export const performers: Performer[] = [
   createPerformer('Minnie Petterlin', '5 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Trixie Hepburn', '(None)', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
 
-  // THURSDAY - Stage Two (5:00 PM to 6:00 PM) - OUR SPACE
+  // THURSDAY - Stage Two (5:00 PM to 6:00 PM) - Pirated Play
+  createPerformer('Alexia Read', '1 year of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('April Muscovich', '3 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Avery Murtagh', '4 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Blaise Carr', 'First Year Pin June', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
@@ -237,35 +254,37 @@ export const performers: Performer[] = [
   createPerformer('Isabella Gill', '3 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Jasper Walton', '5 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Logan Crothers', '(None)', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Marcelle Varma', '3 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+  // createPerformer('Marcelle Varma', '3 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Phillipa Kohlman', '4 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Sophie Pedrotti', 'First Year Pin June', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
 
-  // THURSDAY - Stage Two (5:30 PM to 6:30 PM) - THE BAD SIDE
-  createPerformer('Charlie Flack', 'Intermediate', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Erin Mills', 'Beginner', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Eve Sheldrick', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('James Johnson', '3 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Jane Lonsdale', '5 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Kayleigh White', '(None)', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Lotti Anstee', '3 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Macy Camm', '4 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Sienna Davey', 'First Year Pin June', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Susannah Mayne Mayne', 'Intermediate', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Thomas McColl', 'Beginner', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Willow Johnson', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  // FRIDAY - Stage Two (4:00 PM to 5:00 PM) - Our Space
+  createPerformer('Arabella McGowen', '3 years of drama', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Charlie Flack', 'Intermediate', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Erin Mills', 'Beginner', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  // createPerformer('Eve Sheldrick', '2 years of drama', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('James Johnson', '3 years of drama', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Jane Lonsdale', '5 years of drama', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Lotti Anstee', '3 years of drama', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Macy Camm', '4 years of drama', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Sienna Davey', 'First Year Pin June', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Susannah Mayne', 'Intermediate', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Thomas McColl', 'Beginner', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
+  createPerformer('Willow Johnson', '2 years of drama', 'Friday, 28 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
 
-  // THURSDAY - Stage Two (6:00 PM to 7:00 PM) - PIRATED
-  createPerformer('Charlotte Bysouth', '3 years of drama', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Isabelle Smith', '5 years of drama', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Kaylee Hitchcock', '(None)', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Layla Ware', '3 years of drama', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Mila Holmfield', '4 years of drama', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Nora Thompson', 'First Year Pin June', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Olivia Akers', 'Intermediate', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Rachel Toifl', 'Beginner', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Skylar Shard', '2 years of drama', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
-  createPerformer('Victoria May Yong', '3 years of drama', 'Thursday, 6 November 2025', '6:00 PM to 7:00 PM', 'Stage Two'),
+  // FRIDAY - Stage Two (5:30 PM to 6:30 PM) - The Bad Side
+  createPerformer('Anaïs Lyons', '1 year of drama', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Charlotte Bysouth', '3 years of drama', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Isabelle Smith', '5 years of drama', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Kaylee Hitchcock', '(None)', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Kayleigh White', '(None)', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Layla Ware', '3 years of drama', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Mila Holmfield', '4 years of drama', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Nora Thompson', 'First Year Pin June', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Olivia Akers', 'Intermediate', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Rachel Toifl', 'Beginner', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Skylar Shard', '2 years of drama', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Victoria May Yong', '3 years of drama', 'Friday, 28 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
 ];
 
 // Helper functions to query performers

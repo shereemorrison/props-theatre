@@ -80,10 +80,11 @@ export const days: Day[] = [
     stages: [
       {
         id: 'stage-one-tuesday',
-        stageNumber: 'Stage One',
-        title: 'FIVE MINUTES',
-        writtenBy: 'Olivia Jacobs and Alise Amarant',
-        summary: 'Brody lives in a thousand worlds complete with adventures, main characters and invisible friends. What is the cost of five minutes? Inspired by the worlds that the young at heart can make up and the power of being distracted within our everyday lives.',
+        stageNumber: 'Stage Two',
+        //4pm
+        title: 'THE BAD SIDE',
+        writtenBy: 'Alise Amarant',
+        summary: 'At the annual meeting of the Bad Wolves Club, we’re given a behind-the-scenes look into the secret world of wolves. Gathered from fables, TV shows, comics, and films, these famous “bad wolves” come together to challenge their notorious reputation and explore what it takes to be seen as good once again.friends',
         cast: [
           { name: 'Example 1', role: 'Actor' },
           { name: 'Example 2', role: 'Actor' },
@@ -96,10 +97,11 @@ export const days: Day[] = [
       },
       {
         id: 'stage-two-tuesday',
+        //5pm
         stageNumber: 'Stage Two',
-        title: 'THE BAD SIDE',
-        writtenBy: 'Alise Amarant',
-        summary: "At the annual meeting of the Bad Wolves Club, we're given a behind-the-scenes look into the secret world of wolves. Gathered from fables, TV shows, comics, and films, these famous \"bad wolves\" come together to challenge their notorious reputation and explore what it takes to be seen as good once again.",
+        title: 'PIRATED',
+        writtenBy: 'Alise Amarant, Olivia Jacobs and special guest Jacob Amarant',
+        summary: "What happens when a band of pirates finally discovers the land they’ve always dreamed of finding? And once their dream comes true—what comes next? Through the use of song lyrics and storytelling, this play explores the pirates’ hopes, struggles, and the unexpected reality of achieving their long-sought dream when piracy is a crime. ",
         cast: [
           { name: 'Example 1', role: 'Actor' },
           { name: 'Example 2', role: 'Actor' },
@@ -187,7 +189,6 @@ export const days: Day[] = [
     id: 'thursday-27th',
     day: 'Thursday 27th',
     year: 2025,
-    hasThankYou: true,
     stages: [
       {
         id: 'stage-one-thursday',
@@ -206,7 +207,31 @@ export const days: Day[] = [
         awards: []
       },
       {
-        id: 'stage-two-thursday-our-space',
+        id: 'stage-two-thursday-pirated',
+        stageNumber: 'Stage Two',
+        title: 'PIRATED',
+        writtenBy: 'Alise Amarant, Olivia Jacobs and special guest Jacob Amarant',
+        summary: "What happens when a band of pirates finally discovers the land they've always dreamed of finding? And once their dream comes true—what comes next? Through the use of song lyrics and storytelling, this play explores the pirates' hopes, struggles, and the unexpected reality of achieving their long-sought dream when piracy is a crime.",
+        cast: [
+          { name: 'Example 1', role: 'Actor' },
+          { name: 'Example 2', role: 'Actor' },
+          { name: 'Example 3', role: 'Director' },
+          { name: 'Example 4', role: 'Actor' },
+          { name: 'Example 5', role: 'Actor' },
+          { name: 'Example 6', role: 'Producer' }
+        ],
+        awards: []
+      }
+    ]
+  },
+  {
+    id: 'friday-28th',
+    day: 'Friday 28th',
+    year: 2025,
+    hasThankYou: true,
+    stages: [
+      {
+        id: 'stage-two-friday-our-space',
         stageNumber: 'Stage Two',
         title: 'OUR SPACE',
         writtenBy: 'Alise Amarant',
@@ -222,7 +247,7 @@ export const days: Day[] = [
         awards: []
       },
       {
-        id: 'stage-two-thursday-bad-side',
+        id: 'stage-two-friday-bad-side',
         stageNumber: 'Stage Two',
         title: 'THE BAD SIDE',
         writtenBy: 'Alise Amarant',
@@ -235,22 +260,6 @@ export const days: Day[] = [
           { name: 'Example 5', role: 'Actor' },
           { name: 'Example 6', role: 'Director' },
           { name: 'Example 7', role: 'Actor' }
-        ],
-        awards: []
-      },
-      {
-        id: 'stage-two-thursday-pirated',
-        stageNumber: 'Stage Two',
-        title: 'PIRATED',
-        writtenBy: 'Alise Amarant, Olivia Jacobs and special guest Jacob Amarant',
-        summary: "What happens when a band of pirates finally discovers the land they've always dreamed of finding? And once their dream comes true—what comes next? Through the use of song lyrics and storytelling, this play explores the pirates' hopes, struggles, and the unexpected reality of achieving their long-sought dream when piracy is a crime.",
-        cast: [
-          { name: 'Example 1', role: 'Actor' },
-          { name: 'Example 2', role: 'Actor' },
-          { name: 'Example 3', role: 'Director' },
-          { name: 'Example 4', role: 'Actor' },
-          { name: 'Example 5', role: 'Actor' },
-          { name: 'Example 6', role: 'Producer' }
         ],
         awards: []
       }
