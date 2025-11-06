@@ -1,0 +1,305 @@
+// Main SCSS file - imports all organized styles
+@import './styles/_variables';
+@import './styles/layouts/_main';
+@import './styles/components/_header-footer';
+@import './styles/components/_loading';
+@import './styles/components/_menu';
+@import './styles/components/_transition-overlay';
+@import './styles/pages/_detail-page';
+@import './styles/pages/_day-page';
+@import './styles/pages/_stage-gallery';
+
+// Global styles
+body {
+  font-family: "Trocchi", serif; // Body text font
+  background: rgb(19, 19, 19);
+  line-height: 1.15;
+}
+
+// Heading font
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Oswald", sans-serif; // Headings font
+}
+
+* {
+  scrollbar-color: transparent transparent;
+  scrollbar-width: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// Legacy/Unused styles - can be removed later
+[data-page] {
+  --turn-page: 0;
+  --data-page-index: 0;
+  --delta-index: calc(
+    (var(--data-current-page-index) - var(--data-page-index))
+  );
+  transform: rotate(calc(-180deg * var(--turn-page)))
+    translateY(calc(-4px * (var(--delta-index) * 2 - 1) * var(--turn-page)));
+}
+
+.btn {
+  padding: clamp(0.5rem, 2vw, 0.625rem) clamp(1rem, 3vw, 1.25rem);
+  border-radius: clamp(15px, 3vw, 20px);
+  border: none;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: black;
+  &_active {
+    font-weight: 700;
+    background-color: #2b2e3a;
+    color: white;
+  }
+}
+
+// Responsive overlay container - switches to grid on smaller screens
+.overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  @media (max-width: 1024px) {
+    position: relative !important;
+    display: block !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    pointer-events: auto !important;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  .page-overlay {
+    pointer-events: none;
+    touch-action: manipulation;
+    
+    @media (max-width: 1024px) {
+      position: absolute !important;
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .overlay-container {
+    pointer-events: auto;
+  }
+}
+
+// Wrapper styles moved to src/styles/layouts/_main.scss
+// Removed duplicate definition to avoid z-index conflicts
+
+// Loading styles moved to src/styles/components/_loading.scss
+// Removed duplicate definition to avoid conflicts
+
+// Theatrical curtain transition overlay
+.transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 15;
+  display: none;
+  pointer-events: none;
+  
+  &-left,
+  &-right {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: #000;
+    will-change: transform;
+  }
+  
+  &-left {
+    left: 0;
+    transform-origin: left center;
+  }
+  
+  &-right {
+    right: 0;
+    transform-origin: right center;
+  }
+}
+
+.btn {
+  padding: clamp(0.5rem, 2vw, 0.625rem) clamp(1rem, 3vw, 1.25rem);
+  border-radius: clamp(15px, 3vw, 20px);
+  border: none;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  cursor: pointer;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: black;
+  &_active {
+    font-weight: 700;
+    background-color: #2b2e3a;
+    color: white;
+  }
+}
+
+// Landing Page Header Styles moved to src/styles/components/_header-footer.scss
+// Removed duplicate definition to avoid conflicts
+
+.landing-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+  padding: clamp(1rem, 3vw, 2rem);
+  font-size: clamp(0.75rem, 2vw, 1.2rem);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-weight: bold;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+// Day Page Styles moved to src/styles/pages/_day-page.scss
+// Removed duplicate definition to avoid conflicts
+
+// Detail Page Styles moved to src/styles/pages/_detail-page.scss
+// Removed duplicate definition to avoid conflicts
+
+
+// Mobile pages grid animation
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive overlay container - switches to grid on smaller screens
+.overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  // On smaller screens, position relative so it scrolls with canvas
+  @media (max-width: 1024px) {
+    position: relative !important;
+    display: block !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    pointer-events: auto !important;
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  .page-overlay {
+    pointer-events: none;
+    touch-action: manipulation;
+    
+    
+    // On grid layout, overlays are positioned absolutely in JavaScript
+    @media (max-width: 1024px) {
+      position: absolute !important;
+      pointer-events: auto !important;
+      cursor: pointer !important;
+      // Styles are set inline in JavaScript to match 3D positions
+    }
+  }
+}
+
+// Responsive images
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// Media queries for additional responsive adjustments
+@media (max-width: 1024px) {
+  .overlay-container {
+    pointer-events: auto;
+  }
+}
+@media (max-width: 768px) {
+  .landing-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(0.5rem, 2vh, 1rem);
+    
+    .header-links {
+      flex-direction: row;
+      align-items: center;
+      max-width: 100%;
+      
+      a {
+        position: relative;
+        z-index: 25;
+        touch-action: manipulation;
+      }
+    }
+  }
+  
+  .detail-page {
+    .detail-content {
+      padding-top: clamp(4rem, 10vh, 5rem);
+      
+      .cast-grid,
+      .awards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .counter {
+    .counter-word {
+      font-size: clamp(1.5em, 10vw, 3em);
+    }
+  }
+  
+  .landing-header {
+    .header-title {
+      font-size: clamp(1rem, 5vw, 1.5rem);
+    }
+    
+    .header-links {
+      font-size: clamp(0.65rem, 3vw, 1rem);
+    }
+  }
+}
+

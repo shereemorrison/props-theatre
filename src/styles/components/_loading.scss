@@ -1,0 +1,53 @@
+// Loading Screen
+.loadings {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  color: white;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 1;
+  z-index: 20;
+  overflow: visible;
+  
+  // Curtain elements for split animation
+  &-left,
+  &-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    height: 100%;
+    // background-image set via inline style in JSX using imported image (bundled, loads immediately)
+    background-size: cover;
+    background-repeat: no-repeat;
+    will-change: transform;
+    z-index: 2; // Above background but below content
+  }
+  
+  &-left {
+    left: 0;
+    transform-origin: left center;
+    background-position: left center;
+  }
+  
+  &-right {
+    right: 0;
+    transform-origin: right center;
+    background-position: right center;
+  }
+
+}
+
+// Responsive
+@media (max-width: 480px) {
+  .counter {
+    .counter-word {
+      font-size: clamp(1.5em, 10vw, 3em);
+    }
+  }
+}
+
