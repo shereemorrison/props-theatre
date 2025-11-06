@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
 import Menu from '../components/Menu';
 
 interface LandingPageProps {
@@ -26,7 +25,6 @@ function LandingPage({ showMenu = true }: LandingPageProps) {
 
   return (
     <div className="wrapper">
-      <Header />
       {showMenu && (
         <Menu 
           onPageClick={handlePageClick} 

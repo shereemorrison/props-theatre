@@ -10,7 +10,7 @@
   
   // Extra padding on mobile for scrolling
   @media (max-width: 1023px) {
-    padding-top: clamp(1rem, 3vh, 2rem) !important; // Reduced top padding to move menu up
+    padding-top: clamp(0.5rem, 2vh, 1.5rem) !important; // Reduced top padding to move menu up more
     padding-bottom: clamp(6rem, 12vh, 8rem) !important; // Extra padding at bottom for mobile scrolling
   }
 }
