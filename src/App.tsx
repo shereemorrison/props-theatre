@@ -18,11 +18,43 @@ function App() {
   const [loadingHidden, setLoadingHidden] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [curtainImageReady, setCurtainImageReady] = useState(false);
+  const [isPageRefresh, setIsPageRefresh] = useState(false);
   const loading = useRef<HTMLDivElement>(null);
   const landingPageRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Detect if this is a page refresh vs initial load
+  useEffect(() => {
+    // Check if page was loaded via refresh
+    let refreshDetected = false;
+    
+    try {
+      const navigationEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+      if (navigationEntries.length > 0) {
+        const navType = navigationEntries[0].type;
+        // 'reload' means page was refreshed
+        refreshDetected = navType === 'reload';
+      } else {
+        // Fallback for older browsers
+        // @ts-ignore - performance.navigation exists in older browsers
+        const navType = performance.navigation?.type;
+        // Type 1 = TYPE_RELOAD
+        refreshDetected = navType === 1;
+      }
+    } catch (e) {
+      // If Performance API is not available, default to false (show animation)
+      refreshDetected = false;
+    }
+    
+    setIsPageRefresh(refreshDetected);
+    
+    // If it's a refresh, skip the curtain animation
+    if (refreshDetected) {
+      setLoadingHidden(true);
+      setShowMenu(true);
+    }
+  }, []);
 
   // Preload curtain image first, before anything else
   useEffect(() => {
@@ -40,6 +72,9 @@ function App() {
 
   useGSAP(
     () => {
+      // Skip animation if this is a page refresh
+      if (isPageRefresh) return;
+      
       // Wait for curtain image to be ready before starting animation
       if (!curtainImageReady) return;
 
@@ -98,7 +133,7 @@ function App() {
         }
       }, curtainDuration);
     },
-    { scope: loading, dependencies: [curtainImageReady] }
+    { scope: loading, dependencies: [curtainImageReady, isPageRefresh] }
   );
 
   return (
