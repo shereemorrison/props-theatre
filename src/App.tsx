@@ -23,12 +23,6 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Handle refresh - always redirect to home (menu)
-  useEffect(() => {
-    if (location.pathname !== '/') {
-      navigate('/', { replace: true });
-    }
-  }, []); // Only run on mount (refresh)
 
   // Preload curtain image first, before anything else
   useEffect(() => {
