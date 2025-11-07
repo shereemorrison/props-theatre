@@ -29,7 +29,7 @@ const menuItems = [
   { id: 'tuesday-25th', title: 'Tues', subtitle: '25th', route: '/day/tuesday-25th', year: 2025, background: tuesdayBg },
   { id: 'wednesday-26th', title: 'Wed', subtitle: '26th', route: '/day/wednesday-26th', year: 2025, background: wednesdayBg },
   { id: 'thursday-27th', title: 'Thurs', subtitle: '27th', route: '/day/thursday-27th', year: 2025, background: thursdayBg },
-  { id: 'friday-28th', title: 'Fri', subtitle: '28th', route: '/day/friday-28th', year: 2025, background: fridayBg },
+  { id: 'contact', title: 'Contact', subtitle: '', route: '/contact', background: fridayBg },
   { id: 'credits', title: 'Onwards', subtitle: '2026', route: '/acknowledgements', background: onwardsBg },
 ];
 

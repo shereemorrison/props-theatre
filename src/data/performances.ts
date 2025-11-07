@@ -189,6 +189,7 @@ export const days: Day[] = [
     id: 'thursday-27th',
     day: 'Thursday 27th',
     year: 2025,
+    hasThankYou: true,
     stages: [
       {
         id: 'stage-one-thursday',
@@ -221,17 +222,9 @@ export const days: Day[] = [
           { name: 'Example 6', role: 'Producer' }
         ],
         awards: []
-      }
-    ]
-  },
-  {
-    id: 'friday-28th',
-    day: 'Friday 28th',
-    year: 2025,
-    hasThankYou: true,
-    stages: [
+      },
       {
-        id: 'stage-two-friday-our-space',
+        id: 'stage-two-thursday-our-space',
         stageNumber: 'Stage Two',
         title: 'OUR SPACE',
         writtenBy: 'Alise Amarant',
@@ -247,11 +240,11 @@ export const days: Day[] = [
         awards: []
       },
       {
-        id: 'stage-two-friday-bad-side',
+        id: 'stage-two-thursday-bad-side',
         stageNumber: 'Stage Two',
-        title: 'THE BAD SIDE',
-        writtenBy: 'Alise Amarant',
-        summary: "At the annual meeting of the Bad Wolves Club, we're given a behind-the-scenes look into the secret world of wolves. Gathered from fables, TV shows, comics, and films, these famous \"bad wolves\" come together to challenge their notorious reputation and explore what it takes to be seen as good once again.",
+        title: 'FERRIER\'S SHOES',
+        writtenBy: 'Alise Amarant, Olivia Jacobs and special guest Darcy Gibson',
+        summary: "In Ferrier's Shoes, we spend a day with Stanley in his family's old shoe shop — passed down through generations from his father's father's father. It's just Stanley now, serving everyone from teenagers to toddlers to grannies. But something strange is afoot: all the left shoes have mysteriously vanished. As the mystery deepens, it might take a detective — or something more — to uncover the real reason behind the missing shoes.",
         cast: [
           { name: 'Example 1', role: 'Actor' },
           { name: 'Example 2', role: 'Actor' },
@@ -264,7 +257,7 @@ export const days: Day[] = [
         awards: []
       }
     ]
-  }
+  },
 ];
 
 // Legacy interface for backwards compatibility
