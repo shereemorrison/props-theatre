@@ -259,7 +259,7 @@ export const performers: Performer[] = [
   createPerformer('Sam Miller', '4 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
 
   // TUESDAY - Stage Three (6:00 PM to 7:00 PM) - Ferrier's Shoes Play
-  createPerformer('Abigail Kay', '5 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  createPerformer('Abbygail Kay', '5 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Amelia O\'Rielly', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Athena Jones', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Bailey Norton', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
