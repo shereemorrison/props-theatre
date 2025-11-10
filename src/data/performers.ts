@@ -3,6 +3,7 @@ export interface Performer {
   id: string; // Unique identifier (normalized name)
   name: string;
   commitment: string;
+  award: boolean; // True if performer is in the award list
   awards?: string[]; // Optional array of award names
   photoUrl?: string; // Optional - add this when you have photos
   performances: PerformerPerformance[];
@@ -14,6 +15,83 @@ export interface PerformerPerformance {
   time: string; // "4:00 PM to 5:00 PM"
   stage: string; // "Stage One", "Stage Two", or "Stage Three"
   stageId: string; // Maps to stage.id in performances.ts (e.g., "stage-one-monday")
+}
+
+// List of performers eligible for awards (from spreadsheet)
+const awardEligiblePerformers = new Set([
+  'Kayleigh Hutchinson', 'Skylar Shard', 'Tahlia Petrie', 'Liam Westbury', 'Ella Singe',
+  'George Macumber', 'Lilly Nadin', 'Keira Heath', 'Eadie Glatz', 'George Clohesy',
+  'Milla Web', 'Brock Kostos', 'Charlotte McAuliffe', 'Grace Johnstone', 'Sienna Davey',
+  'Ella Manypeney', 'Phillipa Kohlman', 'Dominic Petterlin', 'Madeline Petterlin', 'Arlie Allen',
+  'Letty Sendy', 'Otto Luedecke', 'Taleitha Perrow', 'Emily Ede', 'Greta Sbaglia',
+  'Ruby Sait', 'Alyssa Delmenico', 'Malis Worrell', 'Reyansh Thaker', 'Cora Critch',
+  'Kennedy Murphey', 'Lydia Deepan', 'Millie Jensen', 'Corazon Mangantulao', 'Poppy Stanaway',
+  'Marcelle Varma', 'Eve Martin', 'Georgina Sbaglia', 'Charlotte Perryman', 'Ruby Robson',
+  'Matilda Robertson', 'Sara Douglas', 'Leo Epps', 'Lilly Foster', 'Charlotte Bysouth',
+  'Peyton Bish', 'Scarlett Besley', 'Athena Jones', 'Henry Connolly', 'Arlo Sergi',
+  'Jack Carter', 'Darby Scott-Anderson', 'Maggie Deacon', 'Paris Carr', 'Alira / Steve Hill',
+  'Ivy Burdeu', 'Amelia O\'Rielly', 'Arabella McGowen', 'Ellen Frigerio', 'Macy Macumber',
+  'Neve Duthie', 'Charlie Wills', 'Elsie Rice', 'Olivia Osborne', 'Nellie Ratcliffe',
+  'Ewan Dellar', 'Jackson Petty-Willis', 'Abbygail Kay', 'Amy Clarkson', 'Clementine Gray',
+  'Maggie Amarant', 'Hazel Ziffer', 'Audrey Savage', 'Finn Cunningham', 'Bailey Norton',
+  'Victoria Tomkins', 'Alice Stockx', 'Tamati McLarty', 'Paige DeJong', 'Tahlia Giffard',
+  'Darcy Gibson', 'Finn Beattie', 'Olivia Wells', 'Innes Downie', 'Isabella Wiegard'
+]);
+
+// Valid commitment values for award-eligible performers
+const validAwardCommitments = new Set([
+  '2 years of drama',
+  '4 years of drama',
+  '5 years of drama',
+  '6 years of drama',
+  '7 years of drama',
+  '8 years of drama',
+  '10 years of drama',
+  'First Year Pin November',
+  'First Year Pin Nov', // Alternative spelling
+  'First Year Pin June'
+]);
+
+// Helper function to normalize commitment (handle variations like "6 years" vs "6 years of drama")
+function normalizeCommitment(commitment: string): string {
+  // Handle "6 years" -> "6 years of drama"
+  if (/^\d+\s+years?$/.test(commitment.trim())) {
+    return commitment.trim() + ' of drama';
+  }
+  // Handle "First Year Pin Nov" -> "First Year Pin November"
+  if (commitment.includes('First Year Pin Nov') && !commitment.includes('November')) {
+    return commitment.replace('Nov', 'November');
+  }
+  return commitment;
+}
+
+// Helper function to check if a performer is in the award list
+function isInAwardList(name: string): boolean {
+  const normalizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const firstName = name.split(/[\s\/]/)[0].toLowerCase();
+  const lastName = name.split(/[\s\/]/).pop()?.toLowerCase() || '';
+  
+  // Check exact match or first name + last name match
+  return Array.from(awardEligiblePerformers).some(awardName => {
+    const awardNormalized = awardName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const awardFirstName = awardName.split(/[\s\/]/)[0].toLowerCase();
+    const awardLastName = awardName.split(/[\s\/]/).pop()?.toLowerCase() || '';
+    
+    // Exact match
+    if (normalizedName === awardNormalized) return true;
+    
+    // First name + last name match (handles "Alira Hill" vs "Alira / Steve Hill")
+    if (firstName === awardFirstName && lastName === awardLastName) return true;
+    
+    
+    return false;
+  });
+}
+
+// Helper function to check if a commitment is valid for award display
+function isValidAwardCommitment(commitment: string): boolean {
+  const normalizedCommitment = normalizeCommitment(commitment);
+  return validAwardCommitments.has(normalizedCommitment);
 }
 
 // Helper function to normalize names for IDs
@@ -51,6 +129,12 @@ function generateStageId(dayId: string, stage: string, date: string, time: strin
   return `stage-${stageNumber}-${dayPart}`;
 }
 
+// Helper function to check if commitment is First Year Pin
+function isFirstYearPin(commitment: string): boolean {
+  const normalized = commitment.toLowerCase();
+  return normalized.includes('first year pin');
+}
+
 // Helper function to create a performer entry
 function createPerformer(
   name: string,
@@ -61,10 +145,23 @@ function createPerformer(
   awards?: string[]
 ): Performer {
   const dayId = mapDateToDayId(date);
+  const award = isInAwardList(name);
+  
+  // Show commitment if:
+  // 1. Performer is in award list AND has a valid commitment, OR
+  // 2. Performer has First Year Pin (regardless of award list status)
+  let finalCommitment = '(None)';
+  if (award && isValidAwardCommitment(commitment)) {
+    finalCommitment = commitment;
+  } else if (isFirstYearPin(commitment)) {
+    finalCommitment = commitment;
+  }
+  
   return {
     id: normalizeName(name),
     name,
-    commitment,
+    commitment: finalCommitment,
+    award,
     awards,
     performances: [
       {
@@ -90,7 +187,7 @@ export const performers: Performer[] = [
   createPerformer('Ella Henshall', '5 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Gabrielle Hall', '(None)', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   // createPerformer('Leo Epps', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Lydia Deepan', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+  // createPerformer('Lydia Deepan', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Penelope Hall', 'First Year Pin June', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Sara Bates', 'Intermediate', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Willow Fuamatu', 'Beginner', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
@@ -109,7 +206,7 @@ export const performers: Performer[] = [
   createPerformer('Kennedy Murphey', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Lilly Nadin', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Logan Shard', '3 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Maggie Amarant', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+  createPerformer('Maggie Amarant', '6 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Nellie Ratcliffe', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Olivia Osborne', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   // createPerformer('Sofia Masullo', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
@@ -162,9 +259,9 @@ export const performers: Performer[] = [
   createPerformer('Sam Miller', '4 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
 
   // TUESDAY - Stage Three (6:00 PM to 7:00 PM) - Ferrier's Shoes Play
-  createPerformer('Abbygail Kay', '5 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  createPerformer('Abigail Kay', '5 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Amelia O\'Rielly', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Athena Jones', '4 years', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  createPerformer('Athena Jones', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Bailey Norton', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Charlotte Perryman', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Ellen Frigerio', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'), // was 3 years of drama - check this means 3 years
@@ -172,12 +269,12 @@ export const performers: Performer[] = [
   createPerformer('Finn Beattie', '8 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('George Macumber', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Georgina Sbaglia', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Hazel Ziffer', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  createPerformer('Hazel Zifler', '6 years', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Liam Westbury', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Olivia Wells', '8 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Ruby Robson', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Taleitha Perrow', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),  // was 3 years of drama - check this means 3 years
-  createPerformer('Victoria Tomkins', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'), // was 5 years of drama - check this means 5 years
+  createPerformer('Victoria Tomkins', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
 
   // WEDNESDAY - Stage One (4:00 PM to 5:00 PM) - Five Minutes Play
   createPerformer('Alyssa Delmenico', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
@@ -190,7 +287,7 @@ export const performers: Performer[] = [
   createPerformer('Lilly Foster', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Millie Haydock', '3 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'), //was 3 years of drama - check this means 3 years
   createPerformer('Reyansh Thaker', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Scarlett Besley', '(None)', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+  createPerformer('Scarlett Besley', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Talia Roe', '3 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
   createPerformer('Ziggy Naidoo', '4 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
 
@@ -205,7 +302,7 @@ export const performers: Performer[] = [
   createPerformer('Jackson Spicer', '(None)', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'), //was 5 year 2025 - check this means 3 years
   createPerformer('Jed Strickland', '3 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Lucy Mclean', '4 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Malis Worrell', 'First Year Pin June', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+  createPerformer('Malis Worrell', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Matilda Robertson', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Matilda Stubbins', 'Beginner', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Olive Gladstone', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
@@ -244,7 +341,7 @@ export const performers: Performer[] = [
   createPerformer('Blaise Carr', 'First Year Pin June', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Brock Kostos', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Corazon Mangantulao', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Ella Manypenny', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+  createPerformer('Ella Manypeney', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Isabella Gill', '3 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Jasper Walton', '5 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
   createPerformer('Logan Crothers', '(None)', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
@@ -268,7 +365,7 @@ export const performers: Performer[] = [
 
   // THURSDAY - Stage Two (5:30 PM to 6:30 PM) - Ferrier's Shoes (moved from Friday, was The Bad Side)
   createPerformer('Anaïs Lyons', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Charlotte Bysouth', '3 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  createPerformer('Charlotte Bysouth', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
   createPerformer('Isabelle Smith', '5 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
   createPerformer('Kaylee Hitchcock', '(None)', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
   createPerformer('Kayleigh White', '(None)', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
