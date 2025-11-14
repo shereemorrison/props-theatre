@@ -269,7 +269,7 @@ export const performers: Performer[] = [
   createPerformer('Finn Beattie', '8 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('George Macumber', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Georgina Sbaglia', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Hazel Ziffer', '6 years', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  createPerformer('Hazel Ziffer', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Liam Westbury', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Olivia Wells', '8 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
   createPerformer('Ruby Robson', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),

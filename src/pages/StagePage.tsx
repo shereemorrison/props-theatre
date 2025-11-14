@@ -54,7 +54,7 @@ export default function StagePage() {
     if (!blurbRef.current || !titleRef.current || !subtitleRef.current || !storyContainerRef.current) {
       return;
     }
-
+    
     const wordElements = blurbRef.current.querySelectorAll('.word');
     if (wordElements.length === 0) return;
 
@@ -75,7 +75,7 @@ export default function StagePage() {
     // Refresh ScrollTrigger to recalculate
     ScrollTrigger.refresh();
 
-    // Title and subtitle - animate immediately
+    // Title and subtitle - animate immediately (staggered)
     gsap.fromTo([titleRef.current, subtitleRef.current], 
       {
         opacity: 0,
@@ -286,3 +286,4 @@ export default function StagePage() {
     </div>
   );
 }
+

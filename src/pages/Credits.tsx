@@ -1,11 +1,125 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Credits() {
   const navigate = useNavigate();
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLParagraphElement>(null);
+  const section1Ref = useRef<HTMLElement>(null);
+  const section2Ref = useRef<HTMLElement>(null);
+  const section3Ref = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useGSAP(() => {
+    if (!titleRef.current || !subtitleRef.current || !introRef.current || !containerRef.current) {
+      return;
+    }
+
+    // Animate title and subtitle immediately (staggered)
+    gsap.fromTo([titleRef.current, subtitleRef.current], 
+      {
+        opacity: 0,
+        y: 30
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        stagger: 0.2,
+        ease: 'power2.out'
+      }
+    );
+
+    // Set initial state for intro and sections
+    gsap.set(introRef.current, {
+      opacity: 0,
+      y: 20
+    });
+
+    // Animate intro paragraph on scroll
+    ScrollTrigger.create({
+      trigger: introRef.current,
+      start: 'top 80%',
+      toggleActions: 'play none none none',
+      onEnter: () => {
+        gsap.to(introRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: 'power2.out'
+        });
+      }
+    });
+
+    // Helper function to animate sections
+    const animateSection = (sectionRef: React.RefObject<HTMLElement>) => {
+      if (!sectionRef.current) return;
+      
+      const heading = sectionRef.current.querySelector('h3');
+      const paragraphs = sectionRef.current.querySelectorAll('p');
+      const lists = sectionRef.current.querySelectorAll('ul');
+      const divs = sectionRef.current.querySelectorAll('div');
+
+      // Get all content elements (headings, paragraphs, lists, and divs with content)
+      // Exclude the subtitle div by checking if it's the subtitleRef
+      const elementsToAnimate: (Element | null)[] = [heading];
+      
+      // Add paragraphs
+      paragraphs.forEach(p => elementsToAnimate.push(p));
+      
+      // Add lists
+      lists.forEach(ul => elementsToAnimate.push(ul));
+      
+      // Add divs that contain paragraphs or lists
+      divs.forEach(div => {
+        if (div.querySelector('p') || div.querySelector('ul')) {
+          elementsToAnimate.push(div);
+        }
+      });
+
+      const validElements = elementsToAnimate.filter(Boolean) as Element[];
+      
+      if (validElements.length === 0) return;
+      
+      gsap.set(validElements, {
+        opacity: 0,
+        y: 20
+      });
+
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: 'top 80%',
+        toggleActions: 'play none none none',
+        onEnter: () => {
+          gsap.to(validElements, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: 'power2.out'
+          });
+        }
+      });
+    };
+
+    // Animate each section
+    if (section1Ref.current) animateSection(section1Ref);
+    if (section2Ref.current) animateSection(section2Ref);
+    if (section3Ref.current) animateSection(section3Ref);
+
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, { scope: containerRef });
   
   return (
-    <div className="detail-page">
+    <div className="detail-page" ref={containerRef}>
       <button 
         className="back-button" 
         onClick={() => navigate('/')}
@@ -22,39 +136,48 @@ export default function Credits() {
         padding: 'clamp(2rem, 5vh, 4rem) clamp(1rem, 3vw, 2rem)',
         textAlign: 'left'
       }}>
-        <h1 style={{ 
-          fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-          marginBottom: 'clamp(0.5rem, 1vh, 1rem)',
-          fontFamily: 'var(--font-heading)',
-          width: '100%',
-          textAlign: 'center'
-        }}>
+        <h1 
+          ref={titleRef}
+          style={{ 
+            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            marginBottom: 'clamp(0.5rem, 1vh, 1rem)',
+            fontFamily: 'var(--font-heading)',
+            width: '100%',
+            textAlign: 'center'
+          }}
+        >
           Looking forward to 2026
         </h1>
         
-        <div style={{
-          fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
-          color: '#ffffff',
-          marginBottom: 'clamp(2rem, 4vh, 3rem)',
-          fontFamily: 'var(--font-heading)',
-          fontWeight: 600,
-          width: '100%',
-          textAlign: 'center'
-        }}>
+        <div 
+          ref={subtitleRef}
+          style={{
+            fontSize: 'clamp(1.1rem, 2.5vw, 1.4rem)',
+            color: '#ffffff',
+            marginBottom: 'clamp(2rem, 4vh, 3rem)',
+            fontFamily: 'var(--font-heading)',
+            fontWeight: 600,
+            width: '100%',
+            textAlign: 'center'
+          }}
+        >
           Good Luck & Best Wishes!
         </div>
 
-        <p style={{ 
-          fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
-          color: '#ffffff',
-          fontFamily: 'var(--font-body)',
-          lineHeight: 1.7,
-          marginBottom: 'clamp(2rem, 4vh, 3rem)'
-        }}>
+        <p 
+          ref={introRef}
+          style={{ 
+            fontSize: 'clamp(1rem, 2.2vw, 1.2rem)',
+            color: '#ffffff',
+            fontFamily: 'var(--font-body)',
+            lineHeight: 1.7,
+            marginBottom: 'clamp(2rem, 4vh, 3rem)'
+          }}
+        >
           As we head into a brand new year, we have some exciting updates to share:
         </p>
 
-        <section style={{ marginBottom: 'clamp(2rem, 4vh, 3rem)' }}>
+        <section ref={section1Ref} style={{ marginBottom: 'clamp(2rem, 4vh, 3rem)' }}>
           <h3 style={{
             fontSize: 'clamp(1.3rem, 3vw, 1.8rem)',
             color: '#ffd700',
@@ -87,7 +210,7 @@ export default function Credits() {
           </ul>
         </section>
 
-        <section style={{ marginBottom: 'clamp(2rem, 4vh, 3rem)' }}>
+        <section ref={section2Ref} style={{ marginBottom: 'clamp(2rem, 4vh, 3rem)' }}>
           <h3 style={{
             fontSize: 'clamp(1.3rem, 3vw, 1.8rem)',
             color: '#ffd700',
@@ -135,7 +258,7 @@ export default function Credits() {
           </div>
         </section>
 
-        <section>
+        <section ref={section3Ref}>
           <h3 style={{
             fontSize: 'clamp(1.3rem, 3vw, 1.8rem)',
             color: '#ffd700',
