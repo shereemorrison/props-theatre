@@ -15,7 +15,7 @@ interface PerformerGridProps {
 
 export default function PerformerGrid({ performers }: PerformerGridProps) {
   // List of performers who should use nophoto.png
-  const performersWithoutPhotos = ['Charlie Flack', 'Thomas McColl', 'Leila Skan', 'Olivia Ogeimi'];
+  const performersWithoutPhotos = ['Charlie Flack', 'Thomas McColl', 'Leila Skan', 'Olivia Ogeimi', 'Erin Mills'];
   
   // Create a map of normalized names to photo paths
   // Prioritize webp files over jpg/png for better performance
