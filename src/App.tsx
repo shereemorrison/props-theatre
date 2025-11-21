@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import LandingPage from "./pages/LandingPage";
 import DayPage from "./pages/DayPage";
 import StagePage from "./pages/StagePage";
@@ -169,6 +170,7 @@ function App() {
           </Routes>
         </div>
       )}
+      <Analytics />
     </>
   );
 }
