@@ -64,10 +64,8 @@ export default function Menu({ onPageClick, isVisible, skipAnimation = false }: 
       rotation: -5
     });
 
-    // Start animation with delay so it starts after curtains have already begun splitting
-    // Curtains take 2.5s to split, so delay menu animation until curtains are partially open
-    const menuAnimationDelay = 0.5; // Start menu animation 0.5s after curtains start splitting
-    const tl = gsap.timeline({ delay: menuAnimationDelay });
+    // Start menu animation immediately
+    const tl = gsap.timeline();
 
     // Menu items - staggered entrance with page-like effect
     tl.to(itemsRef.current, {
@@ -170,7 +168,7 @@ export default function Menu({ onPageClick, isVisible, skipAnimation = false }: 
         maxHeight: '100vh',
         overflowY: 'auto',
         overflowX: 'hidden',
-        zIndex: 10, // Lower than curtains (z-index 20) initially - will be raised after curtains finish
+        zIndex: 10,
         background: 'radial-gradient(ellipse at center, #1a1a1a 0%, #000000 100%)',
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',

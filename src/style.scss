@@ -2,9 +2,7 @@
 @import './styles/_variables';
 @import './styles/layouts/_main';
 @import './styles/components/_header-footer';
-@import './styles/components/_loading';
 @import './styles/components/_menu';
-@import './styles/components/_transition-overlay';
 @import './styles/components/_performer-grid';
 @import './styles/pages/_detail-page';
 @import './styles/pages/_day-page';
@@ -115,40 +113,6 @@ img {
 // Wrapper styles moved to src/styles/layouts/_main.scss
 // Removed duplicate definition to avoid z-index conflicts
 
-// Loading styles moved to src/styles/components/_loading.scss
-// Removed duplicate definition to avoid conflicts
-
-// Theatrical curtain transition overlay
-.transition-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 15;
-  display: none;
-  pointer-events: none;
-  
-  &-left,
-  &-right {
-    position: absolute;
-    top: 0;
-    width: 50%;
-    height: 100%;
-    background: #000;
-    will-change: transform;
-  }
-  
-  &-left {
-    left: 0;
-    transform-origin: left center;
-  }
-  
-  &-right {
-    right: 0;
-    transform-origin: right center;
-  }
-}
 
 .btn {
   padding: clamp(0.5rem, 2vw, 0.625rem) clamp(1rem, 3vw, 1.25rem);

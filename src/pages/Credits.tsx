@@ -1,10 +1,7 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function Credits() {
   const navigate = useNavigate();
@@ -21,8 +18,61 @@ export default function Credits() {
       return;
     }
 
-    // Animate title and subtitle immediately (staggered)
-    gsap.fromTo([titleRef.current, subtitleRef.current], 
+    // Helper function to get all content elements from a section in document order
+    const getSectionElements = (sectionRef: React.RefObject<HTMLElement>): Element[] => {
+      if (!sectionRef.current) return [];
+      
+      const elements: Element[] = [];
+      
+      // Get all direct children and nested content in order
+      const walker = document.createTreeWalker(
+        sectionRef.current,
+        NodeFilter.SHOW_ELEMENT,
+        {
+          acceptNode: (node) => {
+            // Include h3, p, ul, and li elements, but exclude wrapper divs
+            const tagName = node.nodeName.toLowerCase();
+            if (tagName === 'h3' || tagName === 'p' || tagName === 'ul' || tagName === 'li') {
+              // Don't include the subtitle div
+              if (node === subtitleRef.current) return NodeFilter.FILTER_REJECT;
+              return NodeFilter.FILTER_ACCEPT;
+            }
+            return NodeFilter.FILTER_SKIP;
+          }
+        }
+      );
+      
+      let node;
+      while (node = walker.nextNode()) {
+        elements.push(node as Element);
+      }
+
+      return elements;
+    };
+
+    // Get all elements from sections
+    const section1Elements = getSectionElements(section1Ref);
+    const section2Elements = getSectionElements(section2Ref);
+    const section3Elements = getSectionElements(section3Ref);
+
+    // Set initial state for all elements
+    gsap.set([
+      titleRef.current,
+      subtitleRef.current,
+      introRef.current,
+      ...section1Elements,
+      ...section2Elements,
+      ...section3Elements
+    ], {
+      opacity: 0,
+      y: 20
+    });
+
+    // Create timeline for sequential top-to-bottom animation
+    const tl = gsap.timeline();
+
+    // Animate title and subtitle together with stagger (original behavior)
+    tl.fromTo([titleRef.current, subtitleRef.current], 
       {
         opacity: 0,
         y: 30
@@ -36,85 +86,49 @@ export default function Credits() {
       }
     );
 
-    // Set initial state for intro and sections
-    gsap.set(introRef.current, {
-      opacity: 0,
-      y: 20
-    });
+    // Then intro paragraph
+    tl.to(introRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out'
+    }, '-=0.3');
 
-    // Animate intro paragraph on scroll
-    ScrollTrigger.create({
-      trigger: introRef.current,
-      start: 'top 80%',
-      toggleActions: 'play none none none',
-      onEnter: () => {
-        gsap.to(introRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'power2.out'
-        });
-      }
-    });
+    // Then section 1 elements sequentially
+    if (section1Elements.length > 0) {
+      tl.to(section1Elements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'power2.out'
+      }, '-=0.2');
+    }
 
-    // Helper function to animate sections
-    const animateSection = (sectionRef: React.RefObject<HTMLElement>) => {
-      if (!sectionRef.current) return;
-      
-      const heading = sectionRef.current.querySelector('h3');
-      const paragraphs = sectionRef.current.querySelectorAll('p');
-      const lists = sectionRef.current.querySelectorAll('ul');
-      const divs = sectionRef.current.querySelectorAll('div');
+    // Then section 2 elements sequentially
+    if (section2Elements.length > 0) {
+      tl.to(section2Elements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'power2.out'
+      }, '-=0.2');
+    }
 
-      // Get all content elements (headings, paragraphs, lists, and divs with content)
-      // Exclude the subtitle div by checking if it's the subtitleRef
-      const elementsToAnimate: (Element | null)[] = [heading];
-      
-      // Add paragraphs
-      paragraphs.forEach(p => elementsToAnimate.push(p));
-      
-      // Add lists
-      lists.forEach(ul => elementsToAnimate.push(ul));
-      
-      // Add divs that contain paragraphs or lists
-      divs.forEach(div => {
-        if (div.querySelector('p') || div.querySelector('ul')) {
-          elementsToAnimate.push(div);
-        }
-      });
-
-      const validElements = elementsToAnimate.filter(Boolean) as Element[];
-      
-      if (validElements.length === 0) return;
-      
-      gsap.set(validElements, {
-        opacity: 0,
-        y: 20
-      });
-
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top 80%',
-        toggleActions: 'play none none none',
-        onEnter: () => {
-          gsap.to(validElements, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: 'power2.out'
-          });
-        }
-      });
-    };
-
-    // Animate each section
-    if (section1Ref.current) animateSection(section1Ref);
-    if (section2Ref.current) animateSection(section2Ref);
-    if (section3Ref.current) animateSection(section3Ref);
+    // Then section 3 elements sequentially
+    if (section3Elements.length > 0) {
+      tl.to(section3Elements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.08,
+        ease: 'power2.out'
+      }, '-=0.2');
+    }
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      tl.kill();
     };
   }, { scope: containerRef });
   

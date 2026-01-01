@@ -4,11 +4,7 @@ import { days } from '../data/performances';
 import { getPerformersByStageAndDay } from '../data/performers';
 import PerformerGrid from '../components/PerformerGrid';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-
-// Register ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger);
 
 export default function StagePage() {
   const navigate = useNavigate();
@@ -17,12 +13,15 @@ export default function StagePage() {
   const blurbRef = useRef<HTMLParagraphElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
+  const writtenByRef = useRef<HTMLDivElement>(null);
+  const performersHeadingRef = useRef<HTMLHeadingElement>(null);
+  const awardsHeadingRef = useRef<HTMLHeadingElement>(null);
   const storyContainerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   // Find the stage data from all days and also find which day it belongs to
-  let stageData = null;
-  let parentDayId = null;
+  let stageData: typeof days[0]['stages'][0] | null = null;
+  let parentDayId: string | null = null;
   for (const day of days) {
     const found = day.stages.find(s => s.id === stageId);
     if (found) {
@@ -58,25 +57,42 @@ export default function StagePage() {
     const wordElements = blurbRef.current.querySelectorAll('.word');
     if (wordElements.length === 0) return;
 
-    // Set initial state for performer cards IMMEDIATELY (before any animations)
+    // Get performer cards
     const performersSection = sectionRefs.current[1]; // Performers section
-    if (performersSection) {
-      const performerCards = performersSection.querySelectorAll('.performer-card');
-      if (performerCards.length > 0) {
-        // Set initial hidden state immediately - no flash
-        gsap.set(performerCards, {
-          opacity: 0,
-          y: 30,
-          scale: 0.9
-        });
-      }
+    const performerCards = performersSection ? performersSection.querySelectorAll('.performer-card') : [];
+    
+    // Get awards section if it exists
+    const awardsSection = sectionRefs.current[2];
+    const awardsCards = awardsSection ? Array.from(awardsSection.querySelectorAll('.awards-grid > div')) : [];
+
+    // Set initial state for all elements
+    gsap.set([
+      titleRef.current,
+      subtitleRef.current,
+      writtenByRef.current,
+      performersHeadingRef.current,
+      awardsHeadingRef.current,
+      ...Array.from(wordElements),
+      ...Array.from(awardsCards)
+    ], {
+      opacity: 0,
+      y: 20
+    });
+
+    // Set initial state for performer cards with scale
+    if (performerCards.length > 0) {
+      gsap.set(performerCards, {
+        opacity: 0,
+        y: 30,
+        scale: 0.9
+      });
     }
 
-    // Refresh ScrollTrigger to recalculate
-    ScrollTrigger.refresh();
+    // Create timeline for sequential top-to-bottom animation
+    const tl = gsap.timeline();
 
-    // Title and subtitle - animate immediately (staggered)
-    gsap.fromTo([titleRef.current, subtitleRef.current], 
+    // Header section: Title, subtitle, written by, and blurb - animate tightly together
+    tl.fromTo([titleRef.current, subtitleRef.current], 
       {
         opacity: 0,
         y: 30
@@ -90,136 +106,71 @@ export default function StagePage() {
       }
     );
 
-    // Set initial state for words
-    gsap.set(wordElements, {
-      opacity: 0,
-      y: 20
-    });
+    // Written by - tight overlap
+    if (writtenByRef.current) {
+      tl.to(writtenByRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      }, '-=0.3');
+    }
 
-    // Words - animate on scroll with fast stagger so all animate together
-    ScrollTrigger.create({
-      trigger: blurbRef.current,
-      start: 'top 80%',
-      toggleActions: 'play none none none',
-      onEnter: () => {
-        // Create timeline for blurb and performer cards
-        const blurbTimeline = gsap.timeline();
-        
-        // Animate blurb text first
-        blurbTimeline.to(wordElements, {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.01, // Much faster stagger so all words animate together
-          ease: 'power2.out'
-        });
-        
-        // Animate performer cards at the same time as blurb starts
-        if (performersSection) {
-          const performerCards = performersSection.querySelectorAll('.performer-card');
-          
-          if (performerCards.length > 0) {
-            blurbTimeline.to(performerCards, {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.6,
-              stagger: 0.05,
-              ease: 'power2.out'
-            }, 0); // Start at the same time as blurb (position 0 in timeline)
-          }
-        }
-      }
-    });
+    // Blurb words - animate quickly together, tight overlap
+    tl.to(wordElements, {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      stagger: 0.01,
+      ease: 'power2.out'
+    }, '-=0.3');
 
-    // Story sections - animate as they come into view
-    sectionRefs.current.forEach((section, index) => {
-      if (!section) return;
+    // Small gap before performers section starts
+    // Performers heading - starts after header section completes
+    if (performersHeadingRef.current) {
+      tl.to(performersHeadingRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      }, '-=0.1');
+    }
 
-      // Check if section is already in viewport
-      const rect = section.getBoundingClientRect();
-      const isInView = rect.top < window.innerHeight && rect.bottom > 0;
+    // Performer cards - animate together with heading
+    if (performerCards.length > 0) {
+      tl.to(performerCards, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.05,
+        ease: 'power2.out'
+      }, '-=0.4');
+    }
 
-      // Set initial state
-      gsap.set(section, {
-        opacity: isInView ? 1 : 0,
-        y: isInView ? 0 : 50,
-        scale: isInView ? 1 : 0.95
-      });
+    // Awards heading
+    if (awardsHeadingRef.current) {
+      tl.to(awardsHeadingRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+      }, '-=0.2');
+    }
 
-      // If already in view, skip animation
-      if (isInView) return;
+    // Awards cards
+    if (awardsCards.length > 0) {
+      tl.to(awardsCards, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'power2.out'
+      }, '-=0.2');
+    }
 
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top 75%',
-        toggleActions: 'play none none reverse',
-        onEnter: () => {
-          gsap.to(section, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            ease: 'power2.out'
-          });
-        },
-        onEnterBack: () => {
-          gsap.to(section, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            ease: 'power2.out'
-          });
-        }
-      });
-    });
-    
-    // Ensure Cast & Crew section is always visible - fallback if ScrollTrigger doesn't fire
-    // Check all sections and make sure they're visible if they're in viewport
-    // BUT skip performer section (index 1) - it should only animate after blurb
-    const ensureSectionsVisible = () => {
-      sectionRefs.current.forEach((section, index) => {
-        if (!section) return;
-        // Skip performer section (index 1) - it animates with blurb timeline
-        if (index === 1) return;
-        
-        const rect = section.getBoundingClientRect();
-        const isInView = rect.top < window.innerHeight * 1.5 && rect.bottom > -window.innerHeight * 0.5;
-        if (isInView) {
-          const currentOpacity = gsap.getProperty(section, 'opacity') as number;
-          if (currentOpacity === 0 || currentOpacity === undefined) {
-            gsap.to(section, {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.5,
-              ease: 'power2.out'
-            });
-          }
-        }
-      });
-    };
-
-    // Check immediately and after a short delay
-    requestAnimationFrame(() => {
-      ensureSectionsVisible();
-    });
-    
-    setTimeout(() => {
-      ScrollTrigger.refresh();
-      ensureSectionsVisible();
-    }, 500);
-
-    // Cleanup
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => {
-        if (trigger.vars.trigger === storyContainerRef.current || 
-            trigger.vars.trigger === blurbRef.current ||
-            sectionRefs.current.includes(trigger.vars.trigger as HTMLDivElement)) {
-          trigger.kill();
-        }
-      });
+      tl.kill();
     };
   }, { dependencies: [stageData, stagePerformers] });
 
@@ -231,15 +182,17 @@ export default function StagePage() {
         <h1 ref={titleRef}>{stageData.title}</h1>
         <div className="detail-subtitle" ref={subtitleRef}>{stageData.stageNumber}</div>
         {stageData.writtenBy && (
-          <div style={{
-            fontSize: 'clamp(0.9rem, 2.2vw, 1.1rem)',
-            fontFamily: "Oswald, sans-serif",
-            color: 'rgba(255, 255, 255, 0.8)',
-            textAlign: 'center',
-            marginTop: 'clamp(0.5rem, 1.5vh, 1rem)',
-            marginBottom: 'clamp(1rem, 2vh, 1.5rem)',
-            fontStyle: 'italic'
-          }}>
+          <div 
+            ref={writtenByRef}
+            style={{
+              fontSize: 'clamp(0.9rem, 2.2vw, 1.1rem)',
+              fontFamily: "Oswald, sans-serif",
+              color: 'rgba(255, 255, 255, 0.8)',
+              textAlign: 'center',
+              marginTop: 'clamp(0.5rem, 1.5vh, 1rem)',
+              marginBottom: 'clamp(1rem, 2vh, 1.5rem)',
+              fontStyle: 'italic'
+            }}>
             Written by {stageData.writtenBy}
           </div>
         )}
@@ -256,13 +209,13 @@ export default function StagePage() {
 
         {/* Performers Grid - replaces Cast and Gallery */}
         <section className="story-section performers-section" ref={el => { sectionRefs.current[1] = el as HTMLDivElement }}>
-          <h2>Performers</h2>
+          <h2 ref={performersHeadingRef}>Performers</h2>
           <PerformerGrid performers={stagePerformers} />
         </section>
 
         {stageData.awards.length > 0 && (
           <section className="story-section" ref={el => { sectionRefs.current[2] = el as HTMLDivElement }}>
-            <h2>Awards & Recognition</h2>
+            <h2 ref={awardsHeadingRef}>Awards & Recognition</h2>
             <div className="awards-grid">
               {stageData.awards.map((award, i) => (
                 <div key={i} style={{

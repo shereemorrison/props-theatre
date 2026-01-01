@@ -1,10 +1,7 @@
 import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function ThankYou() {
   const navigate = useNavigate();
@@ -18,65 +15,63 @@ export default function ThankYou() {
       return;
     }
 
-    // Animate title immediately
-    gsap.fromTo(titleRef.current, 
-      {
-        opacity: 0,
-        y: 30
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power2.out'
-      }
-    );
-
-    // Set initial state for sections
+    // Get section elements
     const section1Heading = section1Ref.current.querySelector('h2');
     const section1Paragraphs = section1Ref.current.querySelectorAll('p');
     const section2Heading = section2Ref.current.querySelector('h2');
     const section2Paragraphs = section2Ref.current.querySelectorAll('p');
 
-    gsap.set([section1Heading, ...section1Paragraphs, section2Heading, ...section2Paragraphs], {
+    // Set initial state for all elements
+    gsap.set([titleRef.current, section1Heading, ...section1Paragraphs, section2Heading, ...section2Paragraphs], {
       opacity: 0,
       y: 20
     });
 
-    // Animate first section on scroll
-    ScrollTrigger.create({
-      trigger: section1Ref.current,
-      start: 'top 80%',
-      toggleActions: 'play none none none',
-      onEnter: () => {
-        gsap.to([section1Heading, ...section1Paragraphs], {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: 'power2.out'
-        });
-      }
+    // Create timeline for sequential top-to-bottom animation
+    const tl = gsap.timeline();
+
+    // Animate title first
+    tl.to(titleRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: 'power2.out'
     });
 
-    // Animate second section on scroll
-    ScrollTrigger.create({
-      trigger: section2Ref.current,
-      start: 'top 80%',
-      toggleActions: 'play none none none',
-      onEnter: () => {
-        gsap.to([section2Heading, ...section2Paragraphs], {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: 'power2.out'
-        });
-      }
-    });
+    // Then animate first section heading and paragraphs sequentially
+    tl.to(section1Heading, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out'
+    }, '-=0.3'); // Start slightly before previous animation ends
+
+    tl.to(section1Paragraphs, {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      stagger: 0.1,
+      ease: 'power2.out'
+    }, '-=0.2');
+
+    // Then animate second section heading and paragraphs
+    tl.to(section2Heading, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      ease: 'power2.out'
+    }, '-=0.2');
+
+    tl.to(section2Paragraphs, {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      stagger: 0.1,
+      ease: 'power2.out'
+    }, '-=0.2');
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      tl.kill();
     };
   }, { scope: containerRef });
   

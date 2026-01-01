@@ -17,8 +17,35 @@ export interface PerformerPerformance {
   stageId: string; // Maps to stage.id in performances.ts (e.g., "stage-one-monday")
 }
 
-// List of performers eligible for awards (from spreadsheet)
-const awardEligiblePerformers = new Set([
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+// Date strings
+const DATES = {
+  MONDAY: 'Monday, 3 November 2025',
+  TUESDAY: 'Tuesday, 4 November 2025',
+  WEDNESDAY: 'Wednesday, 5 November 2025',
+  THURSDAY: 'Thursday, 6 November 2025',
+} as const;
+
+// Time strings
+const TIMES = {
+  FOUR_TO_FIVE: '4:00 PM to 5:00 PM',
+  FIVE_TO_SIX: '5:00 PM to 6:00 PM',
+  FIVE_THIRTY_TO_SIX_THIRTY: '5:30 PM to 6:30 PM',
+  SIX_TO_SEVEN: '6:00 PM to 7:00 PM',
+} as const;
+
+// Stage strings
+const STAGES = {
+  ONE: 'Stage One',
+  TWO: 'Stage Two',
+  THREE: 'Stage Three',
+} as const;
+
+// Award-eligible performers (from spreadsheet)
+const AWARD_ELIGIBLE_PERFORMERS = new Set([
   'Kayleigh Hutchinson', 'Skylar Shard', 'Tahlia Petrie', 'Liam Westbury', 'Ella Singe',
   'George Macumber', 'Lilly Nadin', 'Keira Heath', 'Eadie Glatz', 'George Clohesy',
   'Milla Web', 'Brock Kostos', 'Charlotte McAuliffe', 'Grace Johnstone', 'Sienna Davey',
@@ -42,7 +69,7 @@ const awardEligiblePerformers = new Set([
 ]);
 
 // Valid commitment values for award-eligible performers
-const validAwardCommitments = new Set([
+const VALID_AWARD_COMMITMENTS = new Set([
   '2 years of drama',
   '4 years of drama',
   '5 years of drama',
@@ -56,7 +83,10 @@ const validAwardCommitments = new Set([
   'First Year Pin June'
 ]);
 
-// Helper function to normalize commitment (handle variations like "6 years" vs "6 years of drama")
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
 function normalizeCommitment(commitment: string): string {
   // Handle "6 years" -> "6 years of drama"
   if (/^\d+\s+years?$/.test(commitment.trim())) {
@@ -69,14 +99,12 @@ function normalizeCommitment(commitment: string): string {
   return commitment;
 }
 
-// Helper function to check if a performer is in the award list
 function isInAwardList(name: string): boolean {
   const normalizedName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
   const firstName = name.split(/[\s\/]/)[0].toLowerCase();
   const lastName = name.split(/[\s\/]/).pop()?.toLowerCase() || '';
   
-  // Check exact match or first name + last name match
-  return Array.from(awardEligiblePerformers).some(awardName => {
+  return Array.from(AWARD_ELIGIBLE_PERFORMERS).some(awardName => {
     const awardNormalized = awardName.toLowerCase().replace(/[^a-z0-9]/g, '');
     const awardFirstName = awardName.split(/[\s\/]/)[0].toLowerCase();
     const awardLastName = awardName.split(/[\s\/]/).pop()?.toLowerCase() || '';
@@ -87,45 +115,40 @@ function isInAwardList(name: string): boolean {
     // First name + last name match (handles "Alira Hill" vs "Alira / Steve Hill")
     if (firstName === awardFirstName && lastName === awardLastName) return true;
     
-    
     return false;
   });
 }
 
-// Helper function to check if a commitment is valid for award display
 function isValidAwardCommitment(commitment: string): boolean {
   const normalizedCommitment = normalizeCommitment(commitment);
-  return validAwardCommitments.has(normalizedCommitment);
+  return VALID_AWARD_COMMITMENTS.has(normalizedCommitment);
 }
 
-// Helper function to normalize names for IDs
 function normalizeName(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '-');
 }
 
-// Helper function to map date string to dayId
 function mapDateToDayId(date: string): string {
   const dateMap: Record<string, string> = {
-    'Monday, 3 November 2025': 'monday-24th',
-    'Tuesday, 4 November 2025': 'tuesday-25th',
-    'Wednesday, 5 November 2025': 'wednesday-26th',
-    'Thursday, 6 November 2025': 'thursday-27th',
+    [DATES.MONDAY]: 'monday-24th',
+    [DATES.TUESDAY]: 'tuesday-25th',
+    [DATES.WEDNESDAY]: 'wednesday-26th',
+    [DATES.THURSDAY]: 'thursday-27th',
   };
   return dateMap[date] || date.toLowerCase().replace(/[^a-z0-9]/g, '-');
 }
 
-// Helper function to generate stageId from dayId, stage, and time
 function generateStageId(dayId: string, stage: string, date: string, time: string): string {
   const stageNumber = stage.replace('Stage ', '').toLowerCase();
   const dayPart = dayId.split('-')[0]; // "monday", "tuesday", etc.
 
   // Special handling for Thursday Stage Two (multiple performances)
-  if (dayId === 'thursday-27th' && stage === 'Stage Two') {
-    if (time === '5:00 PM to 6:00 PM') {
+  if (dayId === 'thursday-27th' && stage === STAGES.TWO) {
+    if (time === TIMES.FIVE_TO_SIX) {
       return 'stage-two-thursday-pirated';
-    } else if (time === '4:00 PM to 5:00 PM') {
+    } else if (time === TIMES.FOUR_TO_FIVE) {
       return 'stage-two-thursday-our-space';
-    } else if (time === '5:30 PM to 6:30 PM') {
+    } else if (time === TIMES.FIVE_THIRTY_TO_SIX_THIRTY) {
       return 'stage-two-thursday-bad-side';
     }
   }
@@ -133,13 +156,10 @@ function generateStageId(dayId: string, stage: string, date: string, time: strin
   return `stage-${stageNumber}-${dayPart}`;
 }
 
-// Helper function to check if commitment is First Year Pin
 function isFirstYearPin(commitment: string): boolean {
-  const normalized = commitment.toLowerCase();
-  return normalized.includes('first year pin');
+  return commitment.toLowerCase().includes('first year pin');
 }
 
-// Helper function to create a performer entry
 function createPerformer(
   name: string,
   commitment: string,
@@ -179,210 +199,344 @@ function createPerformer(
   };
 }
 
-// Performer data extracted from spreadsheet
-export const performers: Performer[] = [
-  // MONDAY - Stage One (4:00 PM to 5:00 PM) - Five Minutes Play
-  createPerformer('Amelia Beukes', 'First Year Pin June', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Arie Pope', 'First Year Pin Nov', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  // createPerformer('Ava Hawkey', '1 year of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  // createPerformer('Chaise Pellas', 'Beginner', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Dakota East', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Eadie Glatz', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'), //3 years of drama
-  createPerformer('Ella Henshall', '5 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Gabrielle Hall', '(None)', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Leo Epps', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Lydia Deepan', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Penelope Hall', 'First Year Pin June', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Sara Bates', '2 years of drama', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Willow Fuamatu', 'Beginner', 'Monday, 3 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+// ============================================================================
+// PERFORMER DATA (Organized by Day/Stage/Time)
+// ============================================================================
 
-  // MONDAY - Stage Two (5:00 PM to 6:00 PM) - The Bad Side Play
-  createPerformer('Charlie Wills', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Cora Critch', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Dante Jameson', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Darby Scott-Anderson', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Ella Fagan', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Ella Singe', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('George Clohesy', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Isla Mealmaker', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Ivy Burdeu', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Jackson Petty-Willis', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Kennedy Murphey', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Lilly Nadin', '2 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Logan Shard', '3 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Maggie Amarant', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Nellie Ratcliffe', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Olivia Osborne', '5 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  // createPerformer('Sofia Masullo', '4 years of drama', 'Monday, 3 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+interface PerformerEntry {
+  name: string;
+  commitment: string;
+  awards?: string[];
+}
 
-  // MONDAY - Stage Three (6:00 PM to 7:00 PM) - The Ferrier's Shoes Play
-  createPerformer('Aida Burns', 'First Year Pin November', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Amelia Watkins', '2 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Ella Bailey', '2 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Ewan Dellar', '4 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Indiana Houghton', '5 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Isabella Wiegard', '9 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Keira Heath', '2 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Lucy Cummings', '4 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Maggie Deacon', '4 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Milla Gregg', 'Intermediate', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Milla Web', '2 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Peyton Bish', '4 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Tahlia Giffard', '6 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Zarah Mealmaker', '3 years of drama', 'Monday, 3 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+interface PerformanceGroup {
+  date: string;
+  time: string;
+  stage: string;
+  performers: PerformerEntry[];
+}
 
-  // TUESDAY - Stage Two (4:00 PM to 5:00 PM) - The Bad Side Play
-  createPerformer('Amy Clarkson', '5 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Billie Lothian', 'Beginner', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Charlee Russell', '2 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Emily Ede', '2 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('George Dewhurst', '5 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Hannah Rodd', '(None)', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Isla Rorke', '3 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Matilda Engi', '4 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Mila McMillan', 'First Year Pin June', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Poppy Stanaway', '2 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Ruby Sait', '2 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Sophie Breewel', '2 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Teddy Thomson', '3 years of drama', 'Tuesday, 4 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
+// Raw performer data organized hierarchically
+const performerData: PerformanceGroup[] = [
+  // MONDAY
+  {
+    date: DATES.MONDAY,
+    time: TIMES.FOUR_TO_FIVE,
+    stage: STAGES.ONE,
+    performers: [
+      { name: 'Amelia Beukes', commitment: 'First Year Pin June' },
+      { name: 'Arie Pope', commitment: 'First Year Pin Nov' },
+      { name: 'Dakota East', commitment: '2 years of drama' },
+      { name: 'Eadie Glatz', commitment: '2 years of drama' },
+      { name: 'Ella Henshall', commitment: '5 years of drama' },
+      { name: 'Gabrielle Hall', commitment: '(None)' },
+      { name: 'Leo Epps', commitment: '2 years of drama' },
+      { name: 'Lydia Deepan', commitment: '2 years of drama' },
+      { name: 'Penelope Hall', commitment: 'First Year Pin June' },
+      { name: 'Sara Bates', commitment: '2 years of drama' },
+      { name: 'Willow Fuamatu', commitment: 'Beginner' },
+    ],
+  },
+  {
+    date: DATES.MONDAY,
+    time: TIMES.FIVE_TO_SIX,
+    stage: STAGES.TWO,
+    performers: [
+      { name: 'Charlie Wills', commitment: '5 years of drama' },
+      { name: 'Cora Critch', commitment: '2 years of drama' },
+      { name: 'Dante Jameson', commitment: '2 years of drama' },
+      { name: 'Darby Scott-Anderson', commitment: '4 years of drama' },
+      { name: 'Ella Fagan', commitment: '5 years of drama' },
+      { name: 'Ella Singe', commitment: '2 years of drama' },
+      { name: 'George Clohesy', commitment: '2 years of drama' },
+      { name: 'Isla Mealmaker', commitment: '4 years of drama' },
+      { name: 'Ivy Burdeu', commitment: '4 years of drama' },
+      { name: 'Jackson Petty-Willis', commitment: '5 years of drama' },
+      { name: 'Kennedy Murphey', commitment: '2 years of drama' },
+      { name: 'Lilly Nadin', commitment: '2 years of drama' },
+      { name: 'Logan Shard', commitment: '3 years of drama' },
+      { name: 'Maggie Amarant', commitment: '4 years of drama' },
+      { name: 'Nellie Ratcliffe', commitment: '4 years of drama' },
+      { name: 'Olivia Osborne', commitment: '5 years of drama' },
+    ],
+  },
+  {
+    date: DATES.MONDAY,
+    time: TIMES.SIX_TO_SEVEN,
+    stage: STAGES.THREE,
+    performers: [
+      { name: 'Aida Burns', commitment: 'First Year Pin November' },
+      { name: 'Amelia Watkins', commitment: '2 years of drama' },
+      { name: 'Ella Bailey', commitment: '2 years of drama' },
+      { name: 'Ewan Dellar', commitment: '4 years of drama' },
+      { name: 'Indiana Houghton', commitment: '5 years of drama' },
+      { name: 'Isabella Wiegard', commitment: '9 years of drama' },
+      { name: 'Keira Heath', commitment: '2 years of drama' },
+      { name: 'Lucy Cummings', commitment: '4 years of drama' },
+      { name: 'Maggie Deacon', commitment: '4 years of drama' },
+      { name: 'Milla Gregg', commitment: 'Intermediate' },
+      { name: 'Milla Web', commitment: '2 years of drama' },
+      { name: 'Peyton Bish', commitment: '4 years of drama' },
+      { name: 'Tahlia Giffard', commitment: '6 years of drama' },
+      { name: 'Zarah Mealmaker', commitment: '3 years of drama' },
+    ],
+  },
 
-  // TUESDAY - Stage Two (5:00 PM to 6:00 PM) - Pirated Play
-  createPerformer('Anna Francis', 'First Year Pin Nov', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Arlie Allen', '2 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Eliza Hepburn', '(None)', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Elsie Rice', '5 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Freddy Campbell', '4 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Grace Beattie', 'First Year Pin June', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Greta Sbaglia', '2 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Kaia Langeder', 'Beginner', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Leila Skan', '2 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Letty Sendy', '2 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Memphis June Meggs', '5 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Olivia Ogeimi', '(None)', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Otto Luedecke', '2 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Sam Miller', '4 years of drama', 'Tuesday, 4 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
+  // TUESDAY
+  {
+    date: DATES.TUESDAY,
+    time: TIMES.FOUR_TO_FIVE,
+    stage: STAGES.ONE,
+    performers: [
+      { name: 'Billie Lothian', commitment: 'Beginner' },
+      { name: 'Charlee Russell', commitment: '2 years of drama' },
+      { name: 'Emily Ede', commitment: '2 years of drama' },
+      { name: 'George Dewhurst', commitment: '5 years of drama' },
+      { name: 'Hannah Rodd', commitment: '(None)' },
+      { name: 'Isla Rorke', commitment: '3 years of drama' },
+      { name: 'Matilda Engi', commitment: '4 years of drama' },
+      { name: 'Mila McMillan', commitment: 'First Year Pin June' },
+      { name: 'Poppy Stanaway', commitment: '2 years of drama' },
+      { name: 'Ruby Sait', commitment: '2 years of drama' },
+      { name: 'Sophie Breewel', commitment: '2 years of drama' },
+      { name: 'Teddy Thomson', commitment: '3 years of drama' },
+    ],
+  },
+  {
+    date: DATES.TUESDAY,
+    time: TIMES.FOUR_TO_FIVE,
+    stage: STAGES.TWO,
+    performers: [
+      { name: 'Amy Clarkson', commitment: '5 years of drama' },
+    ],
+  },
+  {
+    date: DATES.TUESDAY,
+    time: TIMES.FIVE_TO_SIX,
+    stage: STAGES.TWO,
+    performers: [
+      { name: 'Anna Francis', commitment: 'First Year Pin Nov' },
+      { name: 'Arlie Allen', commitment: '2 years of drama' },
+      { name: 'Eliza Hepburn', commitment: '(None)' },
+      { name: 'Elsie Rice', commitment: '5 years of drama' },
+      { name: 'Freddy Campbell', commitment: '4 years of drama' },
+      { name: 'Grace Beattie', commitment: 'First Year Pin June' },
+      { name: 'Greta Sbaglia', commitment: '2 years of drama' },
+      { name: 'Kaia Langeder', commitment: 'Beginner' },
+      { name: 'Leila Skan', commitment: '2 years of drama' },
+      { name: 'Letty Sendy', commitment: '2 years of drama' },
+      { name: 'Memphis June Meggs', commitment: '5 years of drama' },
+      { name: 'Olivia Ogeimi', commitment: '(None)' },
+      { name: 'Otto Luedecke', commitment: '2 years of drama' },
+      { name: 'Sam Miller', commitment: '4 years of drama' },
+    ],
+  },
+  {
+    date: DATES.TUESDAY,
+    time: TIMES.SIX_TO_SEVEN,
+    stage: STAGES.THREE,
+    performers: [
+      { name: 'Abbygail Kay', commitment: '4 years of drama' },
+      { name: 'Amelia O\'Rielly', commitment: '4 years of drama' },
+      { name: 'Athena Jones', commitment: '4 years of drama' },
+      { name: 'Bailey Norton', commitment: '4 years of drama' },
+      { name: 'Charlotte Perryman', commitment: '2 years of drama' },
+      { name: 'Ellen Frigerio', commitment: '4 years of drama' },
+      { name: 'Eve Martin', commitment: '2 years of drama' },
+      { name: 'Finn Beattie', commitment: '6 years of drama' },
+      { name: 'George Macumber', commitment: '2 years of drama' },
+      { name: 'Georgina Sbaglia', commitment: '2 years of drama' },
+      { name: 'Hazel Ziffer', commitment: '4 years of drama' },
+      { name: 'Liam Westbury', commitment: '2 years of drama' },
+      { name: 'Olivia Wells', commitment: '6 years of drama' },
+      { name: 'Ruby Robson', commitment: '2 years of drama' },
+      { name: 'Taleitha Perrow', commitment: '2 years of drama' },
+      { name: 'Victoria Tomkins', commitment: '6 years of drama' },
+    ],
+  },
 
-  // TUESDAY - Stage Three (6:00 PM to 7:00 PM) - Ferrier's Shoes Play
-  createPerformer('Abbygail Kay', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Amelia O\'Rielly', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Athena Jones', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Bailey Norton', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Charlotte Perryman', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Ellen Frigerio', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'), // was 3 years of drama - check this means 3 years
-  createPerformer('Eve Martin', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Finn Beattie', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('George Macumber', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Georgina Sbaglia', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Hazel Ziffer', '4 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Liam Westbury', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Olivia Wells', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Ruby Robson', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Taleitha Perrow', '2 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),  // was 3 years of drama - check this means 3 years
-  createPerformer('Victoria Tomkins', '6 years of drama', 'Tuesday, 4 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
+  // WEDNESDAY
+  {
+    date: DATES.WEDNESDAY,
+    time: TIMES.FOUR_TO_FIVE,
+    stage: STAGES.ONE,
+    performers: [
+      { name: 'Alyssa Delmenico', commitment: '2 years of drama' },
+      { name: 'Amelia Greening', commitment: '(None)' },
+      { name: 'Harper Ridgeway', commitment: '3 years of drama' },
+      { name: 'Henry Beal', commitment: '2 years of drama' },
+      { name: 'Ivy Spicer', commitment: 'First Year Pin June' },
+      { name: 'Josie White', commitment: 'Intermediate' },
+      { name: 'Leo Turner', commitment: 'Beginner' },
+      { name: 'Lilly Foster', commitment: '2 years of drama' },
+      { name: 'Millie Haydock', commitment: '3 years of drama' },
+      { name: 'Reyansh Thaker', commitment: '2 years of drama' },
+      { name: 'Scarlett Besley', commitment: '2 years of drama' },
+      { name: 'Tahlia Roe', commitment: '2 years of drama' },
+      { name: 'Ziggy Naidoo', commitment: '2 years of drama' },
+    ],
+  },
+  {
+    date: DATES.WEDNESDAY,
+    time: TIMES.FIVE_TO_SIX,
+    stage: STAGES.TWO,
+    performers: [
+      { name: 'Aaliyah O\'Meara', commitment: 'First Year Pin Nov' },
+      { name: 'Alex Hicks', commitment: 'First Year Pin June' },
+      { name: 'Alice Stockx', commitment: '4 years of drama' },
+      { name: 'Ava Giffard', commitment: 'Beginner' },
+      { name: 'Charles Smith', commitment: '2 years of drama' },
+      { name: 'Charlotte McAuliffe', commitment: '2 years of drama' },
+      { name: 'Clementine Gray', commitment: '4 years of drama' },
+      { name: 'Jackson Spicer', commitment: '(None)' },
+      { name: 'Jed Strickland', commitment: '2 years of drama' },
+      { name: 'Lucy Mclean', commitment: '4 years of drama' },
+      { name: 'Malis Worrell', commitment: '2 years of drama' },
+      { name: 'Matilda Robertson', commitment: '2 years of drama' },
+      { name: 'Matilda Stubbins', commitment: 'Beginner' },
+      { name: 'Olive Gladstone', commitment: '2 years of drama' },
+      { name: 'Oliver Grange', commitment: '3 years of drama' },
+      { name: 'Paige DeJong', commitment: '6 years of drama' },
+      { name: 'Rebekah Mclean', commitment: '(None)' },
+    ],
+  },
+  {
+    date: DATES.WEDNESDAY,
+    time: TIMES.SIX_TO_SEVEN,
+    stage: STAGES.THREE,
+    performers: [
+      { name: 'Alira Hill', commitment: '4 years of drama' },
+      { name: 'Arlo Sergi', commitment: '4 years of drama' },
+      { name: 'Eva Lees', commitment: '4 years of drama' },
+      { name: 'Hannah Torney', commitment: 'First Year Pin June' },
+      { name: 'Innes Downie', commitment: '8 years of drama' },
+      { name: 'Jack Carter', commitment: '4 years of drama' },
+      { name: 'Jaymen Mannix Pascoe', commitment: '2 years of drama' },
+      { name: 'Neve Duthie', commitment: '4 years of drama' },
+      { name: 'Sara Douglas', commitment: '2 years of drama' },
+      { name: 'Tamati McLarty', commitment: '4 years of drama' },
+    ],
+  },
 
-  // WEDNESDAY - Stage One (4:00 PM to 5:00 PM) - Five Minutes Play
-  createPerformer('Alyssa Delmenico', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Amelia Greening', '(None)', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Harper Ridgeway', '3 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Henry Beal', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Ivy Spicer', 'First Year Pin June', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Josie White', 'Intermediate', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Leo Turner', 'Beginner', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Lilly Foster', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Millie Haydock', '3 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'), //was 3 years of drama - check this means 3 years
-  createPerformer('Reyansh Thaker', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Scarlett Besley', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Tahlia Roe', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Ziggy Naidoo', '2 years of drama', 'Wednesday, 5 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-
-  // WEDNESDAY - Stage Two (5:00 PM to 6:00 PM) The Bad Side Play
-  createPerformer('Aaliyah O\'Meara', 'First Year Pin Nov', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Alex Hicks', 'First Year Pin June', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Alice Stockx', '4 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Ava Giffard', 'Beginner', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Charles Smith', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Charlotte McAuliffe', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Clementine Gray', '4 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'), //was 3 years of drama - check this means 3 years
-  createPerformer('Jackson Spicer', '(None)', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'), //was 5 year 2025 - check this means 3 years
-  createPerformer('Jed Strickland', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Lucy Mclean', '4 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Malis Worrell', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Matilda Robertson', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Matilda Stubbins', 'Beginner', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Olive Gladstone', '2 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Oliver Grange', '3 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Paige DeJong', '6 years of drama', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Rebekah Mclean', '(None)', 'Wednesday, 5 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-
-  // WEDNESDAY - Stage Three (6:00 PM to 7:00 PM) Ferrier's Shoes Play
-  createPerformer('Alira Hill', '4 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Arlo Sergi', '4 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Eva Lees', '4 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Hannah Torney', 'First Year Pin June', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Innes Downie', '8 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Jack Carter', '4 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Jaymen Mannix Pascoe', '2 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Neve Duthie', '4 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Sara Douglas', '2 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  createPerformer('Tamati McLarty', '4 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-  // createPerformer('Trinity Parker', '3 years of drama', 'Wednesday, 5 November 2025', '6:00 PM to 7:00 PM', 'Stage Three'),
-
-  // THURSDAY - Stage One (4:00 PM to 5:00 PM) Five Minutes Play
-  createPerformer('Charlotte Vandervalk', '1 year of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Dominic Petterlin', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Dominica Mangantulao', 'First Year Pin June', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Elsie Sharp', 'Intermediate', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Elsie Untwan', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Ingrid Campbell', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Millie Jensen', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Minnie Petterlin', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-  createPerformer('Trixie Hepburn', '(None)', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage One'),
-
-  // THURSDAY - Stage Two (5:00 PM to 6:00 PM) - Pirated Play
-  createPerformer('Alexia Read', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('April Muscovich', '3 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Avery Murtagh', '4 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Blaise Carr', 'First Year Pin June', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Brock Kostos', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Corazon Mangantulao', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Ella Manypeney', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Isabella Gill', '3 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Jasper Walton', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Logan Crothers', '(None)', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Marcelle Varma', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Phillipa Kohlman', '2 years of drama', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-  createPerformer('Sophie Pedrotti', 'First Year Pin June', 'Thursday, 6 November 2025', '5:00 PM to 6:00 PM', 'Stage Two'),
-
-  // THURSDAY - Stage Two (4:00 PM to 5:00 PM) - Our Space (moved from Friday)
-  createPerformer('Arabella McGowen', '4 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Charlie Flack', 'Intermediate', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Erin Mills', 'Beginner', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-//   createPerformer('Eve Sheldrick', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('James Johnson', '3 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Jane Lonsdale', '5 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Lotti Anstee', '3 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Macy Camm', '4 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Sienna Davey', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Susannah Mayne', 'Intermediate', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Thomas McColl', 'Beginner', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-  createPerformer('Willow Johnson', '2 years of drama', 'Thursday, 6 November 2025', '4:00 PM to 5:00 PM', 'Stage Two'),
-
-  // THURSDAY - Stage Two (5:30 PM to 6:30 PM) - Ferrier's Shoes (moved from Friday, was The Bad Side)
-  createPerformer('Anaïs Lyons', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Charlotte Bysouth', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Isabelle Smith', '5 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Kaylee Hitchcock', '(None)', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Kayleigh White', '(None)', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Layla Ware', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Mila Holmfield', '4 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Nora Thompson', 'First Year Pin June', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Olivia Akers', 'Intermediate', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Rachel Toifl', 'Beginner', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Skylar Shard', '2 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
-  createPerformer('Victoria May Yong', '3 years of drama', 'Thursday, 6 November 2025', '5:30 PM to 6:30 PM', 'Stage Two'),
+  // THURSDAY
+  {
+    date: DATES.THURSDAY,
+    time: TIMES.FOUR_TO_FIVE,
+    stage: STAGES.ONE,
+    performers: [
+      { name: 'Charlotte Vandervalk', commitment: '1 year of drama' },
+      { name: 'Dominic Petterlin', commitment: '2 years of drama' },
+      { name: 'Dominica Mangantulao', commitment: 'First Year Pin June' },
+      { name: 'Elsie Sharp', commitment: 'Intermediate' },
+      { name: 'Elsie Untwan', commitment: '2 years of drama' },
+      { name: 'Ingrid Campbell', commitment: '2 years of drama' },
+      { name: 'Millie Jensen', commitment: '2 years of drama' },
+      { name: 'Minnie Petterlin', commitment: '2 years of drama' },
+      { name: 'Trixie Hepburn', commitment: '(None)' },
+    ],
+  },
+  {
+    date: DATES.THURSDAY,
+    time: TIMES.FOUR_TO_FIVE,
+    stage: STAGES.TWO,
+    performers: [
+      { name: 'Arabella McGowen', commitment: '4 years of drama' },
+      { name: 'Charlie Flack', commitment: 'Intermediate' },
+      { name: 'Erin Mills', commitment: 'Beginner' },
+      { name: 'James Johnson', commitment: '3 years of drama' },
+      { name: 'Jane Lonsdale', commitment: '5 years of drama' },
+      { name: 'Lotti Anstee', commitment: '3 years of drama' },
+      { name: 'Macy Camm', commitment: '4 years of drama' },
+      { name: 'Sienna Davey', commitment: '2 years of drama' },
+      { name: 'Susannah Mayne', commitment: 'Intermediate' },
+      { name: 'Thomas McColl', commitment: 'Beginner' },
+      { name: 'Willow Johnson', commitment: '2 years of drama' },
+    ],
+  },
+  {
+    date: DATES.THURSDAY,
+    time: TIMES.FIVE_TO_SIX,
+    stage: STAGES.TWO,
+    performers: [
+      { name: 'Alexia Read', commitment: '2 years of drama' },
+      { name: 'April Muscovich', commitment: '3 years of drama' },
+      { name: 'Avery Murtagh', commitment: '4 years of drama' },
+      { name: 'Blaise Carr', commitment: 'First Year Pin June' },
+      { name: 'Brock Kostos', commitment: '2 years of drama' },
+      { name: 'Corazon Mangantulao', commitment: '2 years of drama' },
+      { name: 'Ella Manypeney', commitment: '2 years of drama' },
+      { name: 'Isabella Gill', commitment: '3 years of drama' },
+      { name: 'Jasper Walton', commitment: '2 years of drama' },
+      { name: 'Logan Crothers', commitment: '(None)' },
+      { name: 'Marcelle Varma', commitment: '2 years of drama' },
+      { name: 'Phillipa Kohlman', commitment: '2 years of drama' },
+      { name: 'Sophie Pedrotti', commitment: 'First Year Pin June' },
+    ],
+  },
+  {
+    date: DATES.THURSDAY,
+    time: TIMES.FIVE_THIRTY_TO_SIX_THIRTY,
+    stage: STAGES.TWO,
+    performers: [
+      { name: 'Anaïs Lyons', commitment: '2 years of drama' },
+      { name: 'Charlotte Bysouth', commitment: '2 years of drama' },
+      { name: 'Isabelle Smith', commitment: '5 years of drama' },
+      { name: 'Kaylee Hitchcock', commitment: '(None)' },
+      { name: 'Kayleigh White', commitment: '(None)' },
+      { name: 'Layla Ware', commitment: '2 years of drama' },
+      { name: 'Mila Holmfield', commitment: '4 years of drama' },
+      { name: 'Nora Thompson', commitment: 'First Year Pin June' },
+      { name: 'Olivia Akers', commitment: 'Intermediate' },
+      { name: 'Rachel Toifl', commitment: 'Beginner' },
+      { name: 'Skylar Shard', commitment: '2 years of drama' },
+      { name: 'Victoria May Yong', commitment: '3 years of drama' },
+    ],
+  },
 ];
 
-// Helper functions to query performers
+// ============================================================================
+// PROCESS DATA INTO PERFORMERS ARRAY
+// ============================================================================
+
+// Group performers by name and merge their performances
+const performersMap = new Map<string, Performer>();
+
+performerData.forEach(group => {
+  group.performers.forEach(entry => {
+    const existingPerformer = performersMap.get(entry.name);
+    
+    if (existingPerformer) {
+      // Add performance to existing performer
+      const dayId = mapDateToDayId(group.date);
+      existingPerformer.performances.push({
+        date: group.date,
+        dayId,
+        time: group.time,
+        stage: group.stage,
+        stageId: generateStageId(dayId, group.stage, group.date, group.time)
+      });
+    } else {
+      // Create new performer
+      const performer = createPerformer(
+        entry.name,
+        entry.commitment,
+        group.date,
+        group.time,
+        group.stage,
+        entry.awards
+      );
+      performersMap.set(entry.name, performer);
+    }
+  });
+});
+
+// Convert map to array
+export const performers: Performer[] = Array.from(performersMap.values());
+
+// ============================================================================
+// QUERY FUNCTIONS
+// ============================================================================
+
 export function getPerformersByDay(dayId: string): Performer[] {
   return performers.filter(performer =>
     performer.performances.some(perf => perf.dayId === dayId)
